@@ -1,4 +1,4 @@
-# anchors.lock — written by anchors.sh update on 2026-11-11T15:50:39
+# anchors.lock — written by anchors.sh update on 2026-11-11T16:10:43
 # path<TAB>line<TAB>sha256(of that line's current text)  — re-read with 'anchors.sh check'
 examples/csv_replay.cpp	42	aee95af18cf3f49d1ffd7b09e90dc4fd33565456ab820aecba659c8b1fec52ef
 examples/csv_replay.cpp	43	b7f0db2996b9355cccd8cd9958337a8ecfd3eaa2f64e62c28b215027c082ca6b

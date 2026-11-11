@@ -3,12 +3,12 @@
 ## engine / contracts / L0_planning — PASS (2026-11-11)
 - Mode: faithful transcription, no fault injection.
 - Property: live reachability, unique/minimal/complete topological plans, reachable-cycle rejection, termination.
-- Code anchors: `include/flexmodel/meta.hpp:12-34`; `include/flexmodel/planner.hpp:9-31`, `40-72`, `74-103`, `106-112`, `136-151`.
+- Code anchors: `include/flexmodel/meta.hpp:12-34`; `include/flexmodel/planner.hpp:9-13`, `15-37`, `46-78`, `80-109`, `112-118`, `142-157`.
 - TLC: primary 16,238 distinct / depth 29; two-inputs 73,894 / 29; two-events 839,836 / 29; every configured check PASS, all transition actions generated states.
 - Finding: none.
 - Scope: planning subroutines, two-node bounded typed metadata; eager whole-graph validation and C++ type rules checked independently.
 - Reviewed: parent agent reviewed model/source correspondence and scope boundaries.
-- Last synced: 2026-11-11; per-line anchors and whole-file source fingerprints recorded.
+- Last synced: 2026-11-11; cycle diagnostic helper reviewed, source mappings refreshed, no material model drift. Executable TLA+ definitions and configuration bounds are unchanged.
 - Record: [L0 output](engine_models/contracts/L0_planning/05_output.md).
 
 ## engine / contracts / L1_execution — PASS (2026-11-11)

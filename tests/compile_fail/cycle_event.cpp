@@ -1,4 +1,4 @@
-// EXPECT_ERROR: cyclic action dependency
+// EXPECT_ERROR: cyclic_action_dependency
 #include <flexmodel/flexmodel.hpp>
 namespace fm = flexmodel;
 struct A {}; struct B {}; struct Live {}; struct Tick {};

@@ -6,6 +6,12 @@ namespace flexmodel::detail {
 // An evaluator query has no event handler roots or producer updates.
 struct query_event {};
 
+// A named non-constexpr failure path keeps cycle diagnostics identifiable on
+// compilers that omit thrown string literals from constant-evaluation errors.
+[[noreturn]] inline void cyclic_action_dependency() {
+    throw "cyclic action dependency";
+}
+
 template<std::size_t N> struct action_graph {
     static constexpr std::size_t capacity = 2 * N;
     // Handles are [0,N); evaluators are [N,2N).
@@ -22,7 +28,7 @@ template<std::size_t N> struct plan_builder {
 
     constexpr void visit(std::size_t a) {
         if (marks[a] == 2) return;
-        if (marks[a] == 1) throw "cyclic action dependency";
+        if (marks[a] == 1) cyclic_action_dependency();
         marks[a] = 1;
         for (std::size_t dep = 0; dep < 2 * N; ++dep)
             if (graph.needs[a][dep]) visit(dep);

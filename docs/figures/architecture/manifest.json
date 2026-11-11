@@ -5,7 +5,7 @@
   "inputs": [
     {
       "path": "inputs/architecture.json",
-      "sha256": "6036f0670e23bb4aa9645889b5ef8033c40d339ee793f890c3c1fb3958393e6a",
+      "sha256": "896f471dae533a5fcac9317dcb12c0962ad62472bddf77f82a64fbfe39e20e8e",
       "role": "specification"
     },
     {
@@ -25,7 +25,7 @@
     },
     {
       "path": "architecture.pdf",
-      "sha256": "36dc88d89ff183dde164c03c366c16913cd244c623eba35f00c620d037ca6258"
+      "sha256": "200fedccc1ae2e272bc328faa50dc5c79519014492c3e277740707d06a6e85c4"
     },
     {
       "path": "architecture.png",
@@ -68,13 +68,13 @@
         "id": "planner",
         "label": "Validate declarations and callbacks\nFind live closure; order actions",
         "boundary": "compile",
-        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
       },
       {
         "id": "plans",
         "label": "Per-event plans + grouped query plans\nActions = node index + handle/eval",
         "boundary": "compile",
-        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5"
       },
       {
         "id": "records",
@@ -117,14 +117,14 @@
         "to": "planner",
         "label": "declarations",
         "kind": "data",
-        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5"
       },
       {
         "from": "planner",
         "to": "plans",
         "label": "build plans",
         "kind": "data",
-        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5"
       },
       {
         "from": "plans",

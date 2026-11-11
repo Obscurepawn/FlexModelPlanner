@@ -26,13 +26,13 @@
       "id": "planner",
       "label": "Validate declarations and callbacks\nFind live closure; order actions",
       "boundary": "compile",
-      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
     },
     {
       "id": "plans",
       "label": "Per-event plans + grouped query plans\nActions = node index + handle/eval",
       "boundary": "compile",
-      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5"
     },
     {
       "id": "records",
@@ -75,14 +75,14 @@
       "to": "planner",
       "label": "declarations",
       "kind": "data",
-      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5"
     },
     {
       "from": "planner",
       "to": "plans",
       "label": "build plans",
       "kind": "data",
-      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=ba5907e4742a5dd9a71861fa742b4704cdadefffc8593c2e0b236e6a8f0c60e5"
     },
     {
       "from": "plans",

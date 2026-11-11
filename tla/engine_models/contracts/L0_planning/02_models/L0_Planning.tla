@@ -3,18 +3,20 @@ EXTENDS Naturals, Sequences, FiniteSets, TLC
 
 \* var <-> code map (faithful transcription; no fault injection)
 \* m: typed metadata, bounded test input (include/flexmodel/meta.hpp:12-34).
-\* roots/mode: selected roots/event/query (include/flexmodel/planner.hpp:46-74,131-154).
-\* live, pass, row, col: in-place N-pass loops (include/flexmodel/planner.hpp:50-69).
-\* marks: 0=new,1=gray,2=black (include/flexmodel/planner.hpp:20-29).
-\* stack: recursive visit frames/dep cursor (include/flexmodel/planner.hpp:23-28).
-\* order: result.actions, cursor: root scan (include/flexmodel/planner.hpp:30-31,106-112,146-154).
+\* roots/mode: selected roots/event/query (include/flexmodel/planner.hpp:52-78,137-157).
+\* live, pass, row, col: in-place N-pass loops (include/flexmodel/planner.hpp:56-75).
+\* marks: 0=new,1=gray,2=black (include/flexmodel/planner.hpp:26-35).
+\* stack: recursive visit frames/dep cursor (include/flexmodel/planner.hpp:29-34).
+\* order: result.actions, cursor: root scan (include/flexmodel/planner.hpp:36-37,112-118,147-157).
 \* phase: closure, DFS, return or compile-time rejection.
-\* Init/ClosureStep: include/flexmodel/planner.hpp:50-69.
-\* RootSkip/RootEnter: include/flexmodel/planner.hpp:106-112,146-154.
-\* DependencySkip/DependencyEnter/Cycle: include/flexmodel/planner.hpp:23-28.
-\* FinishAction: include/flexmodel/planner.hpp:29-31.
-\* FinishPlan/Terminal: include/flexmodel/planner.hpp:112,151.
-\* Needs/Seeds: include/flexmodel/planner.hpp:74-103,106-112,146-154.
+\* Init/ClosureStep: include/flexmodel/planner.hpp:56-75.
+\* RootSkip/RootEnter: include/flexmodel/planner.hpp:112-118,155-157.
+\* DependencySkip/DependencyEnter: include/flexmodel/planner.hpp:29-34.
+\* Cycle: gray-node call at include/flexmodel/planner.hpp:31; the named
+\* non-constexpr rejection helper is include/flexmodel/planner.hpp:9-13.
+\* FinishAction: include/flexmodel/planner.hpp:35-37.
+\* FinishPlan/Terminal: include/flexmodel/planner.hpp:118,157.
+\* Needs/Seeds: include/flexmodel/planner.hpp:80-109,112-118,147-157.
 \* Concurrency: one synchronous builder; no injected faults or C++ type checker.
 
 CONSTANTS NodeCount, EventCount, MaxPorts

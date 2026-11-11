@@ -11,7 +11,7 @@ Faithful transcription of scheduling subroutines, without injected faults. State
 | Per-event subscriptions, state/value ports, own-handler-before-eval | C++ types become bounded integer IDs; only validated input relations are admitted. No type diagnostic claim follows. |
 | DFS recursion, dependency iteration, gray/black colors, result append | An explicit stack preserves call/return behavior; no concurrent execution is added. |
 | Event seeds and declaration-ordered query seeds | Seed IDs use masks. Duplicate input ports collapse because the planner also stores one Boolean edge; this says nothing about callback parameter binding. |
-| Compile-time throw on a gray node | Terminal `error` denotes compile-time rejection, not a runtime failure. |
+| Compile-time rejection on a gray action | The non-constexpr `cyclic_action_dependency()` call rejects constant evaluation. Outside constant evaluation, the helper throws the original exception. Terminal `error` preserves the same rejection outcome. |
 | Complete and minimal plan | Independent finite reachability/cycle predicates are the oracle, rather than a second copy of DFS. |
 
 Every state graph is bounded by the committed configs: two nodes, all handler/evaluator presence masks, all root subsets, one or two event kinds, and at most one or two declared ports in total. No symmetry or state truncation is used. The bounds retain self-cycles, two-action cycles, state versus value reads, handler/eval interleaving, shared prerequisites, empty roots, absent handlers, and structural cycles distributed across different event kinds. Larger/deeper graphs remain outside the claim.
