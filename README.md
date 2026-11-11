@@ -11,23 +11,17 @@ You need GNU Make and a C++20 compiler; running the tests also requires Python 3
 ```sh
 make -j
 make test
-./build-make/recent_trade_vs_mid
-./build-make/csv_replay examples/sample.csv
+./build-make/composite_feature
 ```
 
-The first example prints the book, trade, reset, and query plans, followed by:
+The eight-node example combines current book liquidity with an EMA of trade-price dislocations. It queries Score and FairValue together, then resets the trade history and queries them again:
 
 ```text
-recent10=1.66667, recent3=1.66667
+before reset: score=0.0625, fair=101.0000
+after reset: score=-0.2500, fair=101.0000
 ```
 
-The three recorded `trade_price - mid` differences are `2, 2, 1`. Both features use the same kernel, with independent windows of 10 and 3 trades. During warm-up, each average uses the number of trades received so far. The CSV example produces:
-
-```text
-Q,1.66667,1.66667
-Q,0,0
-Q,2,2
-```
+The [next section](#defining-a-feature) shows the complete program and its DAG. The smaller [rolling-window example](examples/recent_trade_vs_mid.cpp) and [CSV replay tool](examples/csv_replay.cpp) are built alongside it.
 
 On Windows, use WSL2 or an MSYS2 UCRT64 shell with GNU Make, GCC, and Python installed. The same commands work there; native Windows executables have an `.exe` suffix. Use `make help` to list targets, and `CXX=clang++ BUILD_DIR=build-clang` to select Clang. Use separate build directories when changing compilers or build flags.
 
