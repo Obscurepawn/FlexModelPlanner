@@ -1,0 +1,130 @@
+{
+  "title": "FlexModelPlanner: declarations, plans and one engine instance",
+  "data_kind": "observed",
+  "source": "Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
+  "rankdir": "TB",
+  "font_size": 12,
+  "font_family": "DejaVu Sans",
+  "boundaries": [
+    {
+      "id": "compile",
+      "label": "Compile-time metadata and validation"
+    },
+    {
+      "id": "runtime",
+      "label": "Engine instance"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "schema",
+      "label": "Node IDs + kernels\nPer-operation input ports + roots",
+      "boundary": "compile",
+      "evidence": "include/flexmodel/meta.hpp, node, on, eval, inputs, schema, sha256=0273b2bc4109b6e264a3c24783760e9f68063208afb42cb9eb6cb312af306a6c"
+    },
+    {
+      "id": "planner",
+      "label": "Validate declarations and callbacks\nFind live closure; order actions",
+      "boundary": "compile",
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "id": "plans",
+      "label": "Per-event plans + grouped query plans\nActions = node index + handle/eval",
+      "boundary": "compile",
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+    },
+    {
+      "id": "records",
+      "label": "Application events / query requests\nReplay preserves input order",
+      "evidence": "include/flexmodel/replay.hpp, replay_range, sha256=97db408dd8add817bd8499e8952ec413c6a1994cd69ed60674f27b7e86a1f0d3; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "id": "dispatch",
+      "label": "Direct template dispatch\nOptional interpreter uses the same plan",
+      "boundary": "runtime",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "id": "kernels",
+      "label": "Kernel callbacks\nOwn state + declared read-only inputs",
+      "boundary": "runtime",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "id": "state",
+      "label": "Owned state tuple\nStartup parameters and history",
+      "boundary": "runtime",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "id": "values",
+      "label": "Owned output slots\nUpdated on evaluation",
+      "boundary": "runtime",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "id": "outputs",
+      "label": "Grouped output references\nCaller may copy a snapshot",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    }
+  ],
+  "edges": [
+    {
+      "from": "schema",
+      "to": "planner",
+      "label": "declarations",
+      "kind": "data",
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+    },
+    {
+      "from": "planner",
+      "to": "plans",
+      "label": "build plans",
+      "kind": "data",
+      "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+    },
+    {
+      "from": "plans",
+      "to": "dispatch",
+      "label": "specialize calls",
+      "kind": "control",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "from": "records",
+      "to": "dispatch",
+      "label": "on / evaluate",
+      "kind": "sync",
+      "evidence": "include/flexmodel/replay.hpp, replay_range, sha256=97db408dd8add817bd8499e8952ec413c6a1994cd69ed60674f27b7e86a1f0d3; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "from": "dispatch",
+      "to": "kernels",
+      "label": "ordered calls",
+      "kind": "sync",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "from": "kernels",
+      "to": "state",
+      "label": "own state writes",
+      "kind": "data",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "from": "kernels",
+      "to": "values",
+      "label": "eval result",
+      "kind": "data",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    },
+    {
+      "from": "values",
+      "to": "outputs",
+      "label": "query output order",
+      "kind": "data",
+      "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+    }
+  ]
+}

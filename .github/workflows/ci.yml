@@ -1,0 +1,40 @@
+name: build-and-test
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, compiler: g++}
+          - {os: ubuntu-latest, compiler: clang++}
+          - {os: macos-latest, compiler: clang++}
+          - {os: windows-latest, compiler: msvc}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure GCC or Clang
+        if: matrix.compiler != 'msvc'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DFLEXMODEL_BUILD_BENCHMARKS=ON
+      - name: Configure MSVC
+        if: matrix.compiler == 'msvc'
+        run: cmake -S . -B build -DFLEXMODEL_BUILD_BENCHMARKS=ON
+      - run: cmake --build build --config Release --parallel
+      - run: ctest --test-dir build -C Release --output-on-failure --parallel 2
+      - run: cmake --install build --config Release --prefix install
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DFLEXMODEL_SANITIZERS=ON
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure --parallel 2
+  model-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: bash tla/check.sh

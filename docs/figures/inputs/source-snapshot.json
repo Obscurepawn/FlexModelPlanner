@@ -1,0 +1,30 @@
+{
+  "status": "source snapshot identified by file SHA-256",
+  "files": {
+    "include/flexmodel/meta.hpp": "0273b2bc4109b6e264a3c24783760e9f68063208afb42cb9eb6cb312af306a6c",
+    "include/flexmodel/planner.hpp": "dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8",
+    "include/flexmodel/engine.hpp": "b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe",
+    "include/flexmodel/replay.hpp": "97db408dd8add817bd8499e8952ec413c6a1994cd69ed60674f27b7e86a1f0d3",
+    "include/flexmodel/inspect.hpp": "0fce0482bf13e630f3951a02a142c2a9834f9c54f2134cb79f036f27297855c4",
+    "examples/market_kernels.hpp": "011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da",
+    "examples/recent_trade_vs_mid.cpp": "780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+  },
+  "plans": {
+    "Book": [
+      "book.handle"
+    ],
+    "Trade": [
+      "mid.eval",
+      "recent10.handle",
+      "recent3.handle"
+    ],
+    "Reset": [
+      "recent10.handle",
+      "recent3.handle"
+    ],
+    "Query": [
+      "recent10.eval",
+      "recent3.eval"
+    ]
+  }
+}

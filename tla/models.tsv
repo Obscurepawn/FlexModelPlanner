@@ -1,0 +1,6 @@
+# module config (relative to tla/)
+engine_models/contracts/L0_planning/02_models/L0_Planning.tla engine_models/contracts/L0_planning/02_models/L0_Planning.cfg
+engine_models/contracts/L0_planning/02_models/L0_Planning.tla engine_models/contracts/L0_planning/02_models/L0_Planning_two_inputs.cfg
+engine_models/contracts/L0_planning/02_models/L0_Planning.tla engine_models/contracts/L0_planning/02_models/L0_Planning_two_events.cfg
+engine_models/contracts/L1_execution/02_models/L1_Execution.tla engine_models/contracts/L1_execution/02_models/L1_Execution.cfg
+engine_models/contracts/L1_execution/02_models/L1_Execution.tla engine_models/contracts/L1_execution/02_models/L1_Execution_Scale.cfg

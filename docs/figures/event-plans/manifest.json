@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "kind": "architecture",
+  "data_kind": "observed",
+  "inputs": [
+    {
+      "path": "inputs/architecture.json",
+      "sha256": "5511c57a31634ba3f02c89aa6287af68dce0236cedf0572882456096eee1fe8d",
+      "role": "specification"
+    },
+    {
+      "path": "code/render_architecture.py",
+      "sha256": "cb4cd549aaaddbbbb51838a36372827538170c172c5e663a6352f4134cd431ab",
+      "role": "renderer"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "architecture.dot",
+      "sha256": "952396908db7ce60f9acb7ea9dd2e98d0e9bb473675476e06c8659aac1fea227"
+    },
+    {
+      "path": "architecture.svg",
+      "sha256": "4c08bc392154547d61ee554ff611549079dbdcdbbf6eef7f718ade747a1c130c"
+    },
+    {
+      "path": "architecture.pdf",
+      "sha256": "36e4902fb802acf9a1aa9a1b627b4aa32ccff40807b60cdaa89f657acb136ff8"
+    },
+    {
+      "path": "architecture.png",
+      "sha256": "dc86f97119a0781e47be194a8684319fdeac55e1f72bea447ecf42a2db9df8cc"
+    },
+    {
+      "path": "caption.txt",
+      "sha256": "2106a73709afeeaa0f42695e26c9fdc8df947c3b51b86a2738d787e694fbe3df"
+    },
+    {
+      "path": "reproduce.txt",
+      "sha256": "8c408c0418e990f36b0be0bd51029d2a2ad88c06dbe7e0cfd16995439376287e"
+    }
+  ],
+  "parameters": {
+    "title": "Market example: one plan per event and grouped query",
+    "data_kind": "observed",
+    "source": "Actual output of recent_trade_vs_mid. Arrows show execution sequence, not dependency edges. Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
+    "rankdir": "LR",
+    "font_size": 12,
+    "font_family": "DejaVu Sans",
+    "boundaries": [
+      {
+        "id": "query",
+        "label": "Query: actual ordered plan"
+      },
+      {
+        "id": "reset",
+        "label": "Reset: actual ordered plan"
+      },
+      {
+        "id": "trade",
+        "label": "Trade: actual ordered plan"
+      },
+      {
+        "id": "book",
+        "label": "Book: actual ordered plan"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "query_request",
+        "label": "evaluate<Outputs>()",
+        "boundary": "query",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "query_0",
+        "label": "1. recent10.eval",
+        "boundary": "query",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "query_1",
+        "label": "2. recent3.eval",
+        "boundary": "query",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "reset_request",
+        "label": "Reset",
+        "boundary": "reset",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "reset_0",
+        "label": "1. recent10.handle",
+        "boundary": "reset",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "reset_1",
+        "label": "2. recent3.handle",
+        "boundary": "reset",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "trade_request",
+        "label": "TradeEvent",
+        "boundary": "trade",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "trade_0",
+        "label": "1. mid.eval",
+        "boundary": "trade",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "trade_1",
+        "label": "2. recent10.handle",
+        "boundary": "trade",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "trade_2",
+        "label": "3. recent3.handle",
+        "boundary": "trade",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "book_request",
+        "label": "BookEvent",
+        "boundary": "book",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "id": "book_0",
+        "label": "1. book.handle",
+        "boundary": "book",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      }
+    ],
+    "edges": [
+      {
+        "from": "query_request",
+        "to": "query_0",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "query_0",
+        "to": "query_1",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "reset_request",
+        "to": "reset_0",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "reset_0",
+        "to": "reset_1",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "trade_request",
+        "to": "trade_0",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "trade_0",
+        "to": "trade_1",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "trade_1",
+        "to": "trade_2",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      },
+      {
+        "from": "book_request",
+        "to": "book_0",
+        "label": "next",
+        "kind": "control",
+        "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+      }
+    ]
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "graphviz": "dot - graphviz version 2.43.0 (0)",
+    "font_requested": "DejaVu Sans"
+  },
+  "command": [
+    "python3",
+    "code/render_architecture.py",
+    "--input",
+    "inputs/architecture.json",
+    "--output",
+    "replay"
+  ],
+  "warnings": [],
+  "checks": {
+    "schema": "passed",
+    "unique_nodes": "passed",
+    "edge_endpoints": "passed",
+    "observed_evidence_presence": "passed",
+    "semantic_evidence_review": "pending",
+    "visual_review": "pending"
+  }
+}

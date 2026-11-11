@@ -1,0 +1,28 @@
+digraph architecture {
+  graph [rankdir="TB", bgcolor="white", fontname="DejaVu Sans", fontsize="12", pad="0.25", nodesep="0.45", ranksep="0.7", labelloc="t", labeljust="l", label="FlexModelPlanner: declarations, plans and one engine instance\nOBSERVED — evidence references in specification\n[sync] synchronous call; solid / filled arrow\n[data] data movement; solid / V arrow\n[control] control signal; dotted / open arrow"];
+  node [shape="box", style="rounded,filled", fillcolor="#F2F5F7", color="#52616B", fontcolor="#17212B", fontname="DejaVu Sans", fontsize="12", margin="0.17,0.12", penwidth="1.1"];
+  edge [fontname="DejaVu Sans", fontsize="12", penwidth="1.4", arrowsize="0.8"];
+  "records" [label="Application events / query requests\nReplay preserves input order", id="node-records"];
+  "outputs" [label="Grouped output references\nCaller may copy a snapshot", id="node-outputs"];
+  subgraph "cluster_compile" {
+    graph [label="Compile-time metadata and validation", style="rounded,dashed", color="#8B959E", fontname="DejaVu Sans", fontsize="12", margin="18", labeljust="l"];
+    "schema" [label="Node IDs + kernels\nPer-operation input ports + roots", id="node-schema"];
+    "planner" [label="Validate declarations and callbacks\nFind live closure; order actions", id="node-planner"];
+    "plans" [label="Per-event plans + grouped query plans\nActions = node index + handle/eval", id="node-plans"];
+  }
+  subgraph "cluster_runtime" {
+    graph [label="Engine instance", style="rounded,dashed", color="#8B959E", fontname="DejaVu Sans", fontsize="12", margin="18", labeljust="l"];
+    "dispatch" [label="Direct template dispatch\nOptional interpreter uses the same plan", id="node-dispatch"];
+    "kernels" [label="Kernel callbacks\nOwn state + declared read-only inputs", id="node-kernels"];
+    "state" [label="Owned state tuple\nStartup parameters and history", id="node-state"];
+    "values" [label="Owned output slots\nUpdated on evaluation", id="node-values"];
+  }
+  "schema" -> "planner" [style="solid", color="#6A4C93", arrowhead="vee", label="[data] declarations", id="edge-1"];
+  "planner" -> "plans" [style="solid", color="#6A4C93", arrowhead="vee", label="[data] build plans", id="edge-2"];
+  "plans" -> "dispatch" [style="dotted", color="#5B6066", arrowhead="open", label="[control] specialize calls", id="edge-3"];
+  "records" -> "dispatch" [style="solid", color="#1F4E79", arrowhead="normal", label="[sync] on / evaluate", id="edge-4"];
+  "dispatch" -> "kernels" [style="solid", color="#1F4E79", arrowhead="normal", label="[sync] ordered calls", id="edge-5"];
+  "kernels" -> "state" [style="solid", color="#6A4C93", arrowhead="vee", label="[data] own state writes", id="edge-6"];
+  "kernels" -> "values" [style="solid", color="#6A4C93", arrowhead="vee", label="[data] eval result", id="edge-7"];
+  "values" -> "outputs" [style="solid", color="#6A4C93", arrowhead="vee", label="[data] query output order", id="edge-8"];
+}

@@ -1,0 +1,158 @@
+{
+  "title": "Market example: one plan per event and grouped query",
+  "data_kind": "observed",
+  "source": "Actual output of recent_trade_vs_mid. Arrows show execution sequence, not dependency edges. Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
+  "rankdir": "LR",
+  "font_size": 12,
+  "font_family": "DejaVu Sans",
+  "boundaries": [
+    {
+      "id": "query",
+      "label": "Query: actual ordered plan"
+    },
+    {
+      "id": "reset",
+      "label": "Reset: actual ordered plan"
+    },
+    {
+      "id": "trade",
+      "label": "Trade: actual ordered plan"
+    },
+    {
+      "id": "book",
+      "label": "Book: actual ordered plan"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "query_request",
+      "label": "evaluate<Outputs>()",
+      "boundary": "query",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "query_0",
+      "label": "1. recent10.eval",
+      "boundary": "query",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "query_1",
+      "label": "2. recent3.eval",
+      "boundary": "query",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "reset_request",
+      "label": "Reset",
+      "boundary": "reset",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "reset_0",
+      "label": "1. recent10.handle",
+      "boundary": "reset",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "reset_1",
+      "label": "2. recent3.handle",
+      "boundary": "reset",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "trade_request",
+      "label": "TradeEvent",
+      "boundary": "trade",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "trade_0",
+      "label": "1. mid.eval",
+      "boundary": "trade",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "trade_1",
+      "label": "2. recent10.handle",
+      "boundary": "trade",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "trade_2",
+      "label": "3. recent3.handle",
+      "boundary": "trade",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "book_request",
+      "label": "BookEvent",
+      "boundary": "book",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "id": "book_0",
+      "label": "1. book.handle",
+      "boundary": "book",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    }
+  ],
+  "edges": [
+    {
+      "from": "query_request",
+      "to": "query_0",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "query_0",
+      "to": "query_1",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "reset_request",
+      "to": "reset_0",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "reset_0",
+      "to": "reset_1",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "trade_request",
+      "to": "trade_0",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "trade_0",
+      "to": "trade_1",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "trade_1",
+      "to": "trade_2",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    },
+    {
+      "from": "book_request",
+      "to": "book_0",
+      "label": "next",
+      "kind": "control",
+      "evidence": "examples/market_kernels.hpp, Graph, sha256=011e3be1d3240cd65054047d1d9bd9801f6d4fcbeb46cf961b6cb106d8b489da; examples/recent_trade_vs_mid.cpp, main: actual dump_plan output, sha256=780227491ea3f79e914d9928a7da4da513246c7915da104907aedf0aa0c90e77"
+    }
+  ]
+}

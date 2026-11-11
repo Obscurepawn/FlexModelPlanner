@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "kind": "architecture",
+  "data_kind": "observed",
+  "inputs": [
+    {
+      "path": "inputs/architecture.json",
+      "sha256": "6036f0670e23bb4aa9645889b5ef8033c40d339ee793f890c3c1fb3958393e6a",
+      "role": "specification"
+    },
+    {
+      "path": "code/render_architecture.py",
+      "sha256": "cb4cd549aaaddbbbb51838a36372827538170c172c5e663a6352f4134cd431ab",
+      "role": "renderer"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "architecture.dot",
+      "sha256": "67635ac395c2b525ad0ff21aba836d484d6bbe7ce2002d3283fd6c0067779f9b"
+    },
+    {
+      "path": "architecture.svg",
+      "sha256": "ba23b379f9d39d233f3239dff4c46ce4505997b773daa93a09c51ac9326229a4"
+    },
+    {
+      "path": "architecture.pdf",
+      "sha256": "36dc88d89ff183dde164c03c366c16913cd244c623eba35f00c620d037ca6258"
+    },
+    {
+      "path": "architecture.png",
+      "sha256": "f979cd4f49aa09114ca05b5724bd9ed24e66d10ab6d9319dc063f632ed54de31"
+    },
+    {
+      "path": "caption.txt",
+      "sha256": "37b042f2725b279ea84162bdfc47206204b5cb6519bc950bc90c87ed93d15de8"
+    },
+    {
+      "path": "reproduce.txt",
+      "sha256": "8c408c0418e990f36b0be0bd51029d2a2ad88c06dbe7e0cfd16995439376287e"
+    }
+  ],
+  "parameters": {
+    "title": "FlexModelPlanner: declarations, plans and one engine instance",
+    "data_kind": "observed",
+    "source": "Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
+    "rankdir": "TB",
+    "font_size": 12,
+    "font_family": "DejaVu Sans",
+    "boundaries": [
+      {
+        "id": "compile",
+        "label": "Compile-time metadata and validation"
+      },
+      {
+        "id": "runtime",
+        "label": "Engine instance"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "schema",
+        "label": "Node IDs + kernels\nPer-operation input ports + roots",
+        "boundary": "compile",
+        "evidence": "include/flexmodel/meta.hpp, node, on, eval, inputs, schema, sha256=0273b2bc4109b6e264a3c24783760e9f68063208afb42cb9eb6cb312af306a6c"
+      },
+      {
+        "id": "planner",
+        "label": "Validate declarations and callbacks\nFind live closure; order actions",
+        "boundary": "compile",
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "id": "plans",
+        "label": "Per-event plans + grouped query plans\nActions = node index + handle/eval",
+        "boundary": "compile",
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+      },
+      {
+        "id": "records",
+        "label": "Application events / query requests\nReplay preserves input order",
+        "evidence": "include/flexmodel/replay.hpp, replay_range, sha256=97db408dd8add817bd8499e8952ec413c6a1994cd69ed60674f27b7e86a1f0d3; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "id": "dispatch",
+        "label": "Direct template dispatch\nOptional interpreter uses the same plan",
+        "boundary": "runtime",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "id": "kernels",
+        "label": "Kernel callbacks\nOwn state + declared read-only inputs",
+        "boundary": "runtime",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "id": "state",
+        "label": "Owned state tuple\nStartup parameters and history",
+        "boundary": "runtime",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "id": "values",
+        "label": "Owned output slots\nUpdated on evaluation",
+        "boundary": "runtime",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "id": "outputs",
+        "label": "Grouped output references\nCaller may copy a snapshot",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      }
+    ],
+    "edges": [
+      {
+        "from": "schema",
+        "to": "planner",
+        "label": "declarations",
+        "kind": "data",
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+      },
+      {
+        "from": "planner",
+        "to": "plans",
+        "label": "build plans",
+        "kind": "data",
+        "evidence": "include/flexmodel/planner.hpp, planner::live_nodes, validate_all, build_event, query_plan, sha256=dd227bf5ba6b8ca2598a104d1e44a922aaf44853e40d7ad5f3732d6b6247bdd8"
+      },
+      {
+        "from": "plans",
+        "to": "dispatch",
+        "label": "specialize calls",
+        "kind": "control",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "from": "records",
+        "to": "dispatch",
+        "label": "on / evaluate",
+        "kind": "sync",
+        "evidence": "include/flexmodel/replay.hpp, replay_range, sha256=97db408dd8add817bd8499e8952ec413c6a1994cd69ed60674f27b7e86a1f0d3; include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "from": "dispatch",
+        "to": "kernels",
+        "label": "ordered calls",
+        "kind": "sync",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "from": "kernels",
+        "to": "state",
+        "label": "own state writes",
+        "kind": "data",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "from": "kernels",
+        "to": "values",
+        "label": "eval result",
+        "kind": "data",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      },
+      {
+        "from": "values",
+        "to": "outputs",
+        "label": "query output order",
+        "kind": "data",
+        "evidence": "include/flexmodel/engine.hpp, engine::dispatch, compute, handle, eval, states_, values_, outputs, sha256=b8d10ac34b93568a7868a04c4eca2d23a5312fc2dd53cccbb4cbce990c130dfe"
+      }
+    ]
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "graphviz": "dot - graphviz version 2.43.0 (0)",
+    "font_requested": "DejaVu Sans"
+  },
+  "command": [
+    "python3",
+    "code/render_architecture.py",
+    "--input",
+    "inputs/architecture.json",
+    "--output",
+    "replay"
+  ],
+  "warnings": [],
+  "checks": {
+    "schema": "passed",
+    "unique_nodes": "passed",
+    "edge_endpoints": "passed",
+    "observed_evidence_presence": "passed",
+    "semantic_evidence_review": "pending",
+    "visual_review": "pending"
+  }
+}

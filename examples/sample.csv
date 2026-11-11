@@ -1,0 +1,11 @@
+# Same-price trades remain distinct events.
+B,100,102
+T,103
+T,103
+B,102,104
+T,104
+Q
+R
+Q
+T,105
+Q

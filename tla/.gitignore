@@ -1,0 +1,7 @@
+/tools/
+/config.env
+/.registry/
+**/states/
+**/*_TTrace_*
+**/*_trace_*.tlc
+**/MC_*

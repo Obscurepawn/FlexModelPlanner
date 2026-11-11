@@ -1,0 +1,37 @@
+digraph architecture {
+  graph [rankdir="LR", bgcolor="white", fontname="DejaVu Sans", fontsize="12", pad="0.25", nodesep="0.45", ranksep="0.7", labelloc="t", labeljust="l", label="Market example: one plan per event and grouped query\nOBSERVED — evidence references in specification\n[control] control signal; dotted / open arrow"];
+  node [shape="box", style="rounded,filled", fillcolor="#F2F5F7", color="#52616B", fontcolor="#17212B", fontname="DejaVu Sans", fontsize="12", margin="0.17,0.12", penwidth="1.1"];
+  edge [fontname="DejaVu Sans", fontsize="12", penwidth="1.4", arrowsize="0.8"];
+  subgraph "cluster_query" {
+    graph [label="Query: actual ordered plan", style="rounded,dashed", color="#8B959E", fontname="DejaVu Sans", fontsize="12", margin="18", labeljust="l"];
+    "query_request" [label="evaluate<Outputs>()", id="node-query_request"];
+    "query_0" [label="1. recent10.eval", id="node-query_0"];
+    "query_1" [label="2. recent3.eval", id="node-query_1"];
+  }
+  subgraph "cluster_reset" {
+    graph [label="Reset: actual ordered plan", style="rounded,dashed", color="#8B959E", fontname="DejaVu Sans", fontsize="12", margin="18", labeljust="l"];
+    "reset_request" [label="Reset", id="node-reset_request"];
+    "reset_0" [label="1. recent10.handle", id="node-reset_0"];
+    "reset_1" [label="2. recent3.handle", id="node-reset_1"];
+  }
+  subgraph "cluster_trade" {
+    graph [label="Trade: actual ordered plan", style="rounded,dashed", color="#8B959E", fontname="DejaVu Sans", fontsize="12", margin="18", labeljust="l"];
+    "trade_request" [label="TradeEvent", id="node-trade_request"];
+    "trade_0" [label="1. mid.eval", id="node-trade_0"];
+    "trade_1" [label="2. recent10.handle", id="node-trade_1"];
+    "trade_2" [label="3. recent3.handle", id="node-trade_2"];
+  }
+  subgraph "cluster_book" {
+    graph [label="Book: actual ordered plan", style="rounded,dashed", color="#8B959E", fontname="DejaVu Sans", fontsize="12", margin="18", labeljust="l"];
+    "book_request" [label="BookEvent", id="node-book_request"];
+    "book_0" [label="1. book.handle", id="node-book_0"];
+  }
+  "query_request" -> "query_0" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-1"];
+  "query_0" -> "query_1" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-2"];
+  "reset_request" -> "reset_0" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-3"];
+  "reset_0" -> "reset_1" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-4"];
+  "trade_request" -> "trade_0" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-5"];
+  "trade_0" -> "trade_1" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-6"];
+  "trade_1" -> "trade_2" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-7"];
+  "book_request" -> "book_0" [style="dotted", color="#5B6066", arrowhead="open", label="[control] next", id="edge-8"];
+}
