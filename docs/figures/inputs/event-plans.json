@@ -1,5 +1,5 @@
 {
-  "title": "Market example: one plan per event and grouped query",
+  "title": "Event and Query Plans",
   "data_kind": "observed",
   "source": "Actual output of recent_trade_vs_mid. Arrows show execution sequence, not dependency edges. Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
   "rankdir": "LR",

@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "kind": "architecture",
+  "data_kind": "observed",
+  "inputs": [
+    {
+      "path": "inputs/architecture.json",
+      "sha256": "29f66429a0e9e7d7baf09ef85cf003114f72f1edd738d71517eb0522a3f831d6",
+      "role": "specification"
+    },
+    {
+      "path": "code/render_architecture.py",
+      "sha256": "1d07eaa05d9a38533c2229fa61a68062628a53897a292ea13f09d5e813ae379c",
+      "role": "renderer"
+    },
+    {
+      "path": "inputs/composite_feature.cpp",
+      "role": "source snapshot",
+      "sha256": "c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "path": "inputs/source-snapshot.json",
+      "role": "source provenance",
+      "sha256": "805a6316a3517bbbdb8a5df11504ab7d0f7423565c7020bef5db9e5a38fe4069"
+    },
+    {
+      "path": "code/make_composite_inputs.py",
+      "role": "source metadata extractor",
+      "sha256": "b8565e8cd148d82bbf8fb47719b062ee4aee12dd752cbf0b705f759d3a566cc7"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "architecture.dot",
+      "sha256": "17db18ffb15bd4c2843a7422e9186ffeab01c37238d604008e6767b8fee128d1"
+    },
+    {
+      "path": "architecture.svg",
+      "sha256": "ce43cc77a61f86b1d1da6cedeedb0b19ac3df29fd0ceff25fec0cce1e22dcea4"
+    },
+    {
+      "path": "architecture.pdf",
+      "sha256": "00e9f1835da3172e84c3d2e01578148d80c82eb49ff7452b4fb78276b61aa7a5"
+    },
+    {
+      "path": "architecture.png",
+      "sha256": "dcb7a4401a0a246d18273eb4c7db2e3635a54a385188dcf620832ca3dec6d462"
+    },
+    {
+      "path": "caption.txt",
+      "sha256": "a22da6fc75c76c0fd4eda6fad541b5500ea92fed5a6eaab60100da84ed07be6a"
+    },
+    {
+      "path": "reproduce.txt",
+      "sha256": "901bee833c95342a89c129093a7c19eaf250a4b8e689105d8d1c7105b7056050"
+    }
+  ],
+  "parameters": {
+    "title": "Composite Feature DAG",
+    "data_kind": "observed",
+    "source": "Explicit Graph declaration in examples/composite_feature.cpp; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335. Node-level declared input dependencies, not an execution sequence.",
+    "rankdir": "LR",
+    "font_family": "DejaVu Sans",
+    "font_size": 14,
+    "nodes": [
+      {
+        "id": "Book",
+        "label": "Book\non<BookUpdate>\nbook state",
+        "evidence": "examples/composite_feature.cpp:89; node BookId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "Mid",
+        "label": "Mid\neval",
+        "evidence": "examples/composite_feature.cpp:90; node MidId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "Spread",
+        "label": "Spread\neval",
+        "evidence": "examples/composite_feature.cpp:91; node SpreadId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "Imbalance",
+        "label": "Imbalance\neval",
+        "evidence": "examples/composite_feature.cpp:92; node ImbalanceId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "FairValue",
+        "label": "FairValue\neval · queried",
+        "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "BookBias",
+        "label": "BookBias\neval",
+        "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "TradePressure",
+        "label": "TradePressure\non<Trade> + on<Reset>\neval = EMA",
+        "evidence": "examples/composite_feature.cpp:99; node TradePressureId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      },
+      {
+        "id": "Score",
+        "label": "Score\neval · queried",
+        "evidence": "examples/composite_feature.cpp:102; node ScoreId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Book",
+        "to": "Mid",
+        "label": "state_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:90; node MidId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares state_of<BookId>"
+      },
+      {
+        "from": "Book",
+        "to": "Spread",
+        "label": "state_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:91; node SpreadId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares state_of<BookId>"
+      },
+      {
+        "from": "Book",
+        "to": "Imbalance",
+        "label": "state_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:92; node ImbalanceId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares state_of<BookId>"
+      },
+      {
+        "from": "Mid",
+        "to": "FairValue",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<MidId>"
+      },
+      {
+        "from": "Spread",
+        "to": "FairValue",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<SpreadId>"
+      },
+      {
+        "from": "Imbalance",
+        "to": "FairValue",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<ImbalanceId>"
+      },
+      {
+        "from": "FairValue",
+        "to": "BookBias",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<FairValueId>"
+      },
+      {
+        "from": "Mid",
+        "to": "BookBias",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<MidId>"
+      },
+      {
+        "from": "Spread",
+        "to": "BookBias",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<SpreadId>"
+      },
+      {
+        "from": "Mid",
+        "to": "TradePressure",
+        "label": "value_of → on<Trade>",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:99; node TradePressureId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; on<Trade> declares value_of<MidId>"
+      },
+      {
+        "from": "Spread",
+        "to": "TradePressure",
+        "label": "value_of → on<Trade>",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:99; node TradePressureId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; on<Trade> declares value_of<SpreadId>"
+      },
+      {
+        "from": "BookBias",
+        "to": "Score",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:102; node ScoreId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<BookBiasId>"
+      },
+      {
+        "from": "TradePressure",
+        "to": "Score",
+        "label": "value_of → eval",
+        "kind": "data",
+        "evidence": "examples/composite_feature.cpp:102; node ScoreId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<TradePressureId>"
+      }
+    ]
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "graphviz": "dot - graphviz version 2.43.0 (0)",
+    "font_requested": "DejaVu Sans"
+  },
+  "command": [
+    "python3",
+    "code/render_architecture.py",
+    "--input",
+    "inputs/architecture.json",
+    "--output",
+    "replay"
+  ],
+  "warnings": [],
+  "checks": {
+    "schema": "passed",
+    "unique_nodes": "passed",
+    "edge_endpoints": "passed",
+    "observed_evidence_presence": "passed",
+    "semantic_evidence_review": "pending",
+    "visual_review": "pending",
+    "extracted_node_count": 8,
+    "extracted_edge_count": 13
+  }
+}

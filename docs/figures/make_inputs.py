@@ -28,7 +28,7 @@ def main():
     replay = evidence(files[3], "replay_range")
     source = "Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded."
     architecture = {
-        "title": "FlexModelPlanner: declarations, plans and one engine instance",
+        "title": "FlexModelPlanner Architecture",
         "data_kind": "observed", "source": source, "rankdir": "TB", "font_size": 12,
         "font_family": "DejaVu Sans",
         "boundaries": [{"id": "compile", "label": "Compile-time metadata and validation"},
@@ -86,7 +86,7 @@ def main():
             nodes.append({"id": node, "label": f"{i + 1}. {action}", "boundary": group, "evidence": plan_evidence})
             edges.append({"from": previous, "to": node, "label": "next", "kind": "control", "evidence": plan_evidence})
             previous = node
-    plans = {"title": "Market example: one plan per event and grouped query",
+    plans = {"title": "Event and Query Plans",
              "data_kind": "observed", "source": "Actual output of recent_trade_vs_mid. Arrows show execution sequence, not dependency edges. " + source,
              "rankdir": "LR", "font_size": 12, "font_family": "DejaVu Sans", "boundaries": boundaries,
              "nodes": nodes, "edges": edges}

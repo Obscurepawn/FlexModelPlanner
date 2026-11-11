@@ -5,19 +5,19 @@
   "issues": [],
   "measurements": {
     "architecture.svg": {
-      "text_elements": 33,
+      "text_elements": 29,
       "viewBox": [
         0.0,
         0.0,
         623.5,
-        866.0
+        814.0
       ],
       "obviously_hidden_elements": 0,
       "definition_text_elements": 0
     },
     "architecture.pdf": {
       "pages": 1,
-      "text_lines": 33,
+      "text_lines": 29,
       "minimum_font_pt": 12.0,
       "possible_collisions": 0
     }

@@ -1,5 +1,5 @@
 digraph architecture {
-  graph [rankdir="LR", bgcolor="white", fontname="DejaVu Sans", fontsize="12", pad="0.25", nodesep="0.45", ranksep="0.7", labelloc="t", labeljust="l", label="Market example: one plan per event and grouped query\nOBSERVED — evidence references in specification\n[control] control signal; dotted / open arrow"];
+  graph [rankdir="LR", bgcolor="white", fontname="DejaVu Sans", fontsize="12", pad="0.25", nodesep="0.45", ranksep="0.7", labelloc="t", labeljust="l", label="Event and Query Plans"];
   node [shape="box", style="rounded,filled", fillcolor="#F2F5F7", color="#52616B", fontcolor="#17212B", fontname="DejaVu Sans", fontsize="12", margin="0.17,0.12", penwidth="1.1"];
   edge [fontname="DejaVu Sans", fontsize="12", penwidth="1.4", arrowsize="0.8"];
   subgraph "cluster_query" {

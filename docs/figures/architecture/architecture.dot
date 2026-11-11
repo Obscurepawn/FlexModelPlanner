@@ -1,5 +1,5 @@
 digraph architecture {
-  graph [rankdir="TB", bgcolor="white", fontname="DejaVu Sans", fontsize="12", pad="0.25", nodesep="0.45", ranksep="0.7", labelloc="t", labeljust="l", label="FlexModelPlanner: declarations, plans and one engine instance\nOBSERVED — evidence references in specification\n[sync] synchronous call; solid / filled arrow\n[data] data movement; solid / V arrow\n[control] control signal; dotted / open arrow"];
+  graph [rankdir="TB", bgcolor="white", fontname="DejaVu Sans", fontsize="12", pad="0.25", nodesep="0.45", ranksep="0.7", labelloc="t", labeljust="l", label="FlexModelPlanner Architecture"];
   node [shape="box", style="rounded,filled", fillcolor="#F2F5F7", color="#52616B", fontcolor="#17212B", fontname="DejaVu Sans", fontsize="12", margin="0.17,0.12", penwidth="1.1"];
   edge [fontname="DejaVu Sans", fontsize="12", penwidth="1.4", arrowsize="0.8"];
   "records" [label="Application events / query requests\nReplay preserves input order", id="node-records"];

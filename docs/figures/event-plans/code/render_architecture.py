@@ -130,18 +130,9 @@ def make_dot(spec):
     validate_spec(spec)
     font = spec.get("font_family", "DejaVu Sans")
     size = spec.get("font_size", 11)
-    banner = {"observed": "OBSERVED — evidence references in specification",
-              "proposed": "PROPOSED — design, not verified deployment",
-              "synthetic": "SYNTHETIC EXAMPLE — not a real system"}[spec["data_kind"]]
-    used = [kind for kind in KINDS if any(edge["kind"] == kind for edge in spec["edges"])]
-    legend = {"sync": "[sync] synchronous call; solid / filled arrow",
-              "async": "[async] asynchronous message; dashed / filled arrow",
-              "data": "[data] data movement; solid / V arrow",
-              "control": "[control] control signal; dotted / open arrow"}
-    # A graph label is outside the network so it cannot be mistaken for a component.
-    title = spec["title"] + "\n" + banner
-    if used:
-        title += "\n" + "\n".join(legend[k] for k in used)
+    # Keep the canvas focused on the diagram. Provenance remains in the JSON
+    # specification and manifest rather than a status banner or top legend.
+    title = spec["title"]
     lines = ["digraph architecture {",
              "  graph [" + attributes({"rankdir": spec.get("rankdir", "LR"), "bgcolor": "white",
                 "fontname": font, "fontsize": size, "pad": 0.25, "nodesep": 0.45, "ranksep": 0.7,

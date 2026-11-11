@@ -1,0 +1,143 @@
+{
+  "title": "Composite Feature DAG",
+  "data_kind": "observed",
+  "source": "Explicit Graph declaration in examples/composite_feature.cpp; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335. Node-level declared input dependencies, not an execution sequence.",
+  "rankdir": "LR",
+  "font_family": "DejaVu Sans",
+  "font_size": 14,
+  "nodes": [
+    {
+      "id": "Book",
+      "label": "Book\non<BookUpdate>\nbook state",
+      "evidence": "examples/composite_feature.cpp:89; node BookId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "Mid",
+      "label": "Mid\neval",
+      "evidence": "examples/composite_feature.cpp:90; node MidId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "Spread",
+      "label": "Spread\neval",
+      "evidence": "examples/composite_feature.cpp:91; node SpreadId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "Imbalance",
+      "label": "Imbalance\neval",
+      "evidence": "examples/composite_feature.cpp:92; node ImbalanceId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "FairValue",
+      "label": "FairValue\neval · queried",
+      "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "BookBias",
+      "label": "BookBias\neval",
+      "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "TradePressure",
+      "label": "TradePressure\non<Trade> + on<Reset>\neval = EMA",
+      "evidence": "examples/composite_feature.cpp:99; node TradePressureId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    },
+    {
+      "id": "Score",
+      "label": "Score\neval · queried",
+      "evidence": "examples/composite_feature.cpp:102; node ScoreId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335"
+    }
+  ],
+  "edges": [
+    {
+      "from": "Book",
+      "to": "Mid",
+      "label": "state_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:90; node MidId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares state_of<BookId>"
+    },
+    {
+      "from": "Book",
+      "to": "Spread",
+      "label": "state_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:91; node SpreadId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares state_of<BookId>"
+    },
+    {
+      "from": "Book",
+      "to": "Imbalance",
+      "label": "state_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:92; node ImbalanceId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares state_of<BookId>"
+    },
+    {
+      "from": "Mid",
+      "to": "FairValue",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<MidId>"
+    },
+    {
+      "from": "Spread",
+      "to": "FairValue",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<SpreadId>"
+    },
+    {
+      "from": "Imbalance",
+      "to": "FairValue",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:93; node FairValueId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<ImbalanceId>"
+    },
+    {
+      "from": "FairValue",
+      "to": "BookBias",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<FairValueId>"
+    },
+    {
+      "from": "Mid",
+      "to": "BookBias",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<MidId>"
+    },
+    {
+      "from": "Spread",
+      "to": "BookBias",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:96; node BookBiasId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<SpreadId>"
+    },
+    {
+      "from": "Mid",
+      "to": "TradePressure",
+      "label": "value_of → on<Trade>",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:99; node TradePressureId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; on<Trade> declares value_of<MidId>"
+    },
+    {
+      "from": "Spread",
+      "to": "TradePressure",
+      "label": "value_of → on<Trade>",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:99; node TradePressureId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; on<Trade> declares value_of<SpreadId>"
+    },
+    {
+      "from": "BookBias",
+      "to": "Score",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:102; node ScoreId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<BookBiasId>"
+    },
+    {
+      "from": "TradePressure",
+      "to": "Score",
+      "label": "value_of → eval",
+      "kind": "data",
+      "evidence": "examples/composite_feature.cpp:102; node ScoreId; sha256=c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335; eval declares value_of<TradePressureId>"
+    }
+  ]
+}

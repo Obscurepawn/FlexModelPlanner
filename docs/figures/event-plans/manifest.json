@@ -5,35 +5,35 @@
   "inputs": [
     {
       "path": "inputs/architecture.json",
-      "sha256": "5511c57a31634ba3f02c89aa6287af68dce0236cedf0572882456096eee1fe8d",
+      "sha256": "15de098e578635965d7b9d997a57fd620bb06647f57c0f39b280ef52f1c453bf",
       "role": "specification"
     },
     {
       "path": "code/render_architecture.py",
-      "sha256": "cb4cd549aaaddbbbb51838a36372827538170c172c5e663a6352f4134cd431ab",
+      "sha256": "271bc104ef1b005c22ec36fe7a0156ddf6790d28a7f60cce48c3c6d83e70e748",
       "role": "renderer"
     }
   ],
   "outputs": [
     {
       "path": "architecture.dot",
-      "sha256": "952396908db7ce60f9acb7ea9dd2e98d0e9bb473675476e06c8659aac1fea227"
+      "sha256": "2f37fa418472b7d60a80683211530ae8ab6f07a10a0e6402fb980cbb382e1dbe"
     },
     {
       "path": "architecture.svg",
-      "sha256": "4c08bc392154547d61ee554ff611549079dbdcdbbf6eef7f718ade747a1c130c"
+      "sha256": "a07ae035b7c72baa86a7459a94dcfc62a97780e153405f886d1230b857e02a2c"
     },
     {
       "path": "architecture.pdf",
-      "sha256": "da72e8b907ecb3e590ff4a618a8098529a7e27e76d97d39cad831180b3dbb771"
+      "sha256": "6be727d781d90b0949784ee3b37264ad2a9c419f8772aca0518fd5ce81ca10cd"
     },
     {
       "path": "architecture.png",
-      "sha256": "dc86f97119a0781e47be194a8684319fdeac55e1f72bea447ecf42a2db9df8cc"
+      "sha256": "66b6a034ae1bc2f90e8fc809c406162b4a778e490b499d78f461865a2eacc252"
     },
     {
       "path": "caption.txt",
-      "sha256": "2106a73709afeeaa0f42695e26c9fdc8df947c3b51b86a2738d787e694fbe3df"
+      "sha256": "57bfd759c7743804cad74b0c367c72731a8e1d446c47923e089c592fdd4206a9"
     },
     {
       "path": "reproduce.txt",
@@ -41,7 +41,7 @@
     }
   ],
   "parameters": {
-    "title": "Market example: one plan per event and grouped query",
+    "title": "Event and Query Plans",
     "data_kind": "observed",
     "source": "Actual output of recent_trade_vs_mid. Arrows show execution sequence, not dependency edges. Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
     "rankdir": "LR",

@@ -35,6 +35,14 @@ Namespace `flexmodel`, umbrella header `<flexmodel/flexmodel.hpp>`.
 - Replay preserves input order and reuses the same dispatch/evaluation methods. Generic typed/variant range replay is provided; a CSV example includes quote, trade, reset and query records. No implicit timestamp sorting, checkpoint serialization, network ingestion or JIT is promised.
 - Plans can be inspected as arrays and printed with node names and action kinds outside the hot path.
 
+## Build and supported environments
+
+The repository provides a GNU Make build with GCC/Clang-style compiler options and a POSIX shell. Building examples requires a C++20 compiler; the test driver additionally requires Python 3. The CI configuration targets Linux with GCC and Clang, macOS with Clang, and Windows inside MSYS2 UCRT64 with MinGW GCC. Native MSVC command-line builds are outside the provided Make interface.
+
+`make` builds the examples. `make test` builds and runs the functional, allocation, planner-property, negative-compilation, CSV, and installation-consumer checks. `make benchmark` builds and runs the optional comparison workload. `make model-check` runs the bounded TLC configurations through `tla/check.sh` and requires Java plus the documented shell/download tools. `make sanitize` reruns the tests with ASan/UBSan using `SANITIZE_CXX` (Clang by default) in a separate output directory.
+
+`CXX`, `BUILD_DIR`, `PYTHON`, and the usual compiler/linker flag variables are configurable. Build output defaults to `build-make`. `make install PREFIX=... DESTDIR=...` installs the header tree; consumers add the installed include directory to their compiler's search path. No generated CMake package configuration is provided.
+
 ## Acceptance
 
-Tests cover repeated equal-price events, warm-up/eviction, trade-time mid, event-specific reset dependencies, producer-handle-before-consumer-read, same-kernel/different-ID isolation, multiple-output deduplication, query/history separation, root liveness, unknown events, reference/static equivalence, independent arithmetic oracle and replay parity. Negative compilation cases cover invalid metadata, cycles and invalid callbacks. GCC and Clang builds, installation-consumer smoke tests, and ASan/UBSan runs complete the local acceptance gate.
+Tests cover repeated equal-price events, warm-up/eviction, trade-time mid, event-specific reset dependencies, producer-handle-before-consumer-read, same-kernel/different-ID isolation, multiple-output deduplication, query/history separation, root liveness, unknown events, reference/static equivalence, independent arithmetic oracle and replay parity. Negative compilation cases cover invalid metadata, cycles and invalid callbacks. GCC and Clang `make test` runs, installation-consumer smoke tests, and `make sanitize` complete the local acceptance gate. CI configuration describes intended platform coverage; successful execution must be checked separately.

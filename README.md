@@ -6,14 +6,13 @@ This is an independent implementation inspired by Jane Street's [Flex Model blog
 
 ## Quick start
 
-You need CMake 3.20 or later and a C++20 compiler. The library is header-only and has no third-party C++ dependencies. From the repository root, run:
+You need GNU Make and a C++20 compiler; running the tests also requires Python 3. The library is header-only and has no third-party C++ dependencies. From the repository root, run:
 
 ```sh
-cmake -S . -B build-gcc -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++
-cmake --build build-gcc --parallel
-ctest --test-dir build-gcc --output-on-failure
-./build-gcc/recent_trade_vs_mid
-./build-gcc/csv_replay examples/sample.csv
+make -j
+make test
+./build-make/recent_trade_vs_mid
+./build-make/csv_replay examples/sample.csv
 ```
 
 The first example prints the book, trade, reset, and query plans, followed by:
@@ -30,57 +29,182 @@ Q,0,0
 Q,2,2
 ```
 
-On Windows, configure with `cmake -S . -B build`, then run `cmake --build build --config Release` and `ctest --test-dir build -C Release`. Executables are placed in `build/Release/`.
+On Windows, use WSL2 or an MSYS2 UCRT64 shell with GNU Make, GCC, and Python installed. The same commands work there; native Windows executables have an `.exe` suffix. Use `make help` to list targets, and `CXX=clang++ BUILD_DIR=build-clang` to select Clang. Use separate build directories when changing compilers or build flags.
 
 ## Defining a feature
 
-An `Id` identifies a node in the graph. A `Kernel` defines its state and computation. A `node` declares which events it handles and which inputs it reads. You can reuse one kernel under several IDs; each node keeps its own state.
+This example combines current book liquidity with the history of trade prices. Its eight-node DAG contains shared inputs, several layers of evaluation, and a stateful node that updates on trades. An `Id` identifies a node, a `Kernel` implements its state and computation, and a `node` declares its handlers, evaluator, and input ports.
 
-This complete program counts ticks and queries the current count:
+![Composite feature dependency graph](docs/figures/composite-feature/architecture.svg)
+
+Arrows point from an input to its consumer. Mid, Spread, and Imbalance read **Book state**. All other edges read computed **values**. The two edges into TradePressure belong to its **Trade handler**; its evaluator only reads the EMA stored in its own state. Event delivery and Reset are omitted from this dependency view.
+
+| Node | Computation or stored state |
+|---|---|
+| Book | Latest bid, ask, and sizes, updated by `BookUpdate` |
+| Mid | `(bid + ask) / 2` |
+| Spread | `ask - bid` |
+| Imbalance | `(bid_size - ask_size) / (bid_size + ask_size)` |
+| FairValue | `mid + 0.5 * spread * imbalance`, the size-weighted microprice |
+| BookBias | `(fair - mid) / spread`, a dimensionless current-book signal |
+| TradePressure | An EMA of `(trade_price - mid) / spread`, sampled at each trade |
+| Score | `book_bias + trade_pressure` |
+
+The first trade initializes the EMA; later trades give equal weight to the previous EMA and the new sample. Zero total size produces zero imbalance, and a nonpositive spread produces zero normalized bias/sample. The supplied events use finite, valid quotes and nonnegative sizes; input validation belongs at the application boundary.
+
+The complete program is also available as [composite_feature.cpp](examples/composite_feature.cpp):
 
 ```cpp
 #include <flexmodel/flexmodel.hpp>
+#include <iomanip>
 #include <iostream>
 #include <tuple>
 
-struct Tick {};
-struct CountId {};
-struct Count {
-    struct state_type { int count = 0; };
-    using value_type = int;
-    static void handle(state_type& state, const Tick&) noexcept {
-        ++state.count;
-    }
-    static int eval(const state_type& state) noexcept {
-        return state.count;
+namespace fm = flexmodel;
+
+struct BookUpdate { double bid{}, ask{}, bid_size{}, ask_size{}; };
+struct Trade { double price; };
+struct Reset {};
+
+struct BookId {};
+struct MidId {};
+struct SpreadId {};
+struct ImbalanceId {};
+struct FairValueId {};
+struct BookBiasId {};
+struct TradePressureId {};
+struct ScoreId {};
+
+struct Book {
+    using state_type = BookUpdate;
+    static void handle(state_type& state, const BookUpdate& event) noexcept {
+        state = event;
     }
 };
 
-using Graph = flexmodel::graph<
-    flexmodel::node<CountId, Count,
-        flexmodel::on<Tick>, flexmodel::eval<>>>;
+// Stateless scalar evaluators share these two type declarations.
+struct Scalar {
+    struct state_type {};
+    using value_type = double;
+};
+
+struct Mid : Scalar {
+    static double eval(const state_type&, const BookUpdate& book) noexcept {
+        return book.bid / 2.0 + book.ask / 2.0;
+    }
+};
+
+struct Spread : Scalar {
+    static double eval(const state_type&, const BookUpdate& book) noexcept {
+        return book.ask - book.bid;
+    }
+};
+
+struct Imbalance : Scalar {
+    static double eval(const state_type&, const BookUpdate& book) noexcept {
+        const double size = book.bid_size + book.ask_size;
+        return size > 0.0 ? (book.bid_size - book.ask_size) / size : 0.0;
+    }
+};
+
+struct FairValue : Scalar {
+    static double eval(const state_type&, const double& mid,
+                       const double& spread, const double& imbalance) noexcept {
+        return mid + 0.5 * spread * imbalance;
+    }
+};
+
+struct BookBias : Scalar {
+    static double eval(const state_type&, const double& fair,
+                       const double& mid, const double& spread) noexcept {
+        return spread > 0.0 ? (fair - mid) / spread : 0.0;
+    }
+};
+
+struct TradePressure {
+    struct state_type { double ema = 0.0; bool initialized = false; };
+    using value_type = double;
+
+    static void handle(state_type& state, const Trade& event,
+                       const double& mid, const double& spread) noexcept {
+        const double sample = spread > 0.0 ? (event.price - mid) / spread : 0.0;
+        state.ema = state.initialized ? 0.5 * state.ema + 0.5 * sample : sample;
+        state.initialized = true;
+    }
+    static void handle(state_type& state, const Reset&) noexcept { state = {}; }
+    static double eval(const state_type& state) noexcept { return state.ema; }
+};
+
+struct Score : Scalar {
+    static double eval(const state_type&, const double& bias,
+                       const double& pressure) noexcept {
+        return bias + pressure;
+    }
+};
+
+using Graph = fm::graph<
+    fm::node<BookId, Book, fm::on<BookUpdate>>,
+    fm::node<MidId, Mid, fm::eval<fm::inputs<fm::state_of<BookId>>>>,
+    fm::node<SpreadId, Spread, fm::eval<fm::inputs<fm::state_of<BookId>>>>,
+    fm::node<ImbalanceId, Imbalance, fm::eval<fm::inputs<fm::state_of<BookId>>>>,
+    fm::node<FairValueId, FairValue,
+        fm::eval<fm::inputs<fm::value_of<MidId>, fm::value_of<SpreadId>,
+                            fm::value_of<ImbalanceId>>>>,
+    fm::node<BookBiasId, BookBias,
+        fm::eval<fm::inputs<fm::value_of<FairValueId>, fm::value_of<MidId>,
+                            fm::value_of<SpreadId>>>>,
+    fm::node<TradePressureId, TradePressure,
+        fm::on<Trade, fm::inputs<fm::value_of<MidId>, fm::value_of<SpreadId>>>,
+        fm::on<Reset>, fm::eval<>>,
+    fm::node<ScoreId, Score,
+        fm::eval<fm::inputs<fm::value_of<BookBiasId>, fm::value_of<TradePressureId>>>>
+>;
+using Outputs = fm::query<ScoreId, FairValueId>;
 
 int main() {
-    flexmodel::engine<Graph> engine;
-    engine.on(Tick{});
-    engine.on(Tick{});
-    auto result = engine.evaluate<flexmodel::query<CountId>>();
-    std::cout << std::get<0>(result) << '\n';  // 2
+    fm::engine<Graph, fm::roots<ScoreId>> model;
+    model.on(BookUpdate{99.0, 101.0, 30.0, 10.0});
+    model.on(Trade{101.0});
+    model.on(BookUpdate{100.0, 104.0, 10.0, 30.0});
+    model.on(Trade{103.0});
+    model.on(Trade{103.0});  // The same price still changes the EMA.
+
+    std::cout << std::fixed << std::setprecision(4);
+    const auto print = [&](const char* label) {
+        const auto [score, fair] = model.evaluate<Outputs>();
+        std::cout << label << ": score=" << score << ", fair=" << fair << '\n';
+    };
+    print("before reset");
+    model.on(Reset{});
+    print("after reset");
 }
 ```
 
-The template arguments describe the graph at compile time. At runtime, you call `engine.on(event)` as usual, and initialization parameters remain ordinary data. For example, [market_kernels.hpp](examples/market_kernels.hpp) receives its window lengths through `make_engine(10, 3)`.
+After `make`, run `./build-make/composite_feature` to get:
 
-Declare dependencies as input ports on the operation that reads them:
-
-```cpp
-flexmodel::on<TradeEvent,
-    flexmodel::inputs<flexmodel::value_of<MidId>>>
+```text
+before reset: score=0.0625, fair=101.0000
+after reset: score=-0.2500, fair=101.0000
 ```
 
-This gives the trade handler a freshly computed mid value. Its corresponding signature is `handle(State&, const TradeEvent&, const double&) noexcept`. To read book state instead, declare `state_of<BookId>` and accept `const BookState&`. Callbacks do not receive the entire engine, so the node data available through this interface is limited to their declared inputs.
+The trade samples are `0.5, 0.25, 0.25`, so the EMA evolves through `0.5, 0.375, 0.3125`. The two trades at 103 are separate updates even though their prices match. At the final book, fair value is 101 and book bias is -0.25; adding the EMA gives 0.0625. Reset clears the EMA while preserving the book, leaving a score of -0.25.
 
-A node can declare both `on<TradeEvent, ...>` and `on<Reset>`. With no mid input on the reset operation, the reset plan does not compute mid. To select a callback explicitly, use `on<Event, Inputs, &function>` or `eval<Inputs, &function>`.
+The same graph yields different plans:
+
+| Request | Actions in execution order |
+|---|---|
+| `BookUpdate` | `Book.handle` |
+| `Trade` | `Mid.eval → Spread.eval → TradePressure.handle` |
+| `Reset` | `TradePressure.handle` for Reset only |
+| `evaluate<Outputs>()` | `Mid.eval → Spread.eval → Imbalance.eval → FairValue.eval → BookBias.eval → TradePressure.eval → Score.eval` |
+
+Querying Score and FairValue together computes each shared action once. For example, FairValue is both an output and an input to BookBias. The plan executes FairValue before Score, while the returned tuple follows `query<ScoreId, FairValueId>` and therefore contains `(score, fair)`.
+
+`roots<ScoreId>` keeps all eight nodes live because they lie in Score's dependency closure. TradePressure receives every trade even when no query follows, and evaluating its stored EMA does not advance history. Reset has no input ports, so it does not compute Mid or Spread.
+
+Input port order determines callback argument order: `on<Trade, inputs<value_of<MidId>, value_of<SpreadId>>>` calls `handle(State&, const Trade&, const double& mid, const double& spread)`. Callbacks receive their own state and their declared inputs, rather than an engine-wide context. Use `on<Event, Inputs, &function>` or `eval<Inputs, &function>` when a kernel needs an explicitly selected callback.
+
+The graph is fixed at compile time; configuration can still be ordinary instance data. For example, [market_kernels.hpp](examples/market_kernels.hpp) receives its rolling-window sizes through `make_engine(10, 3)`.
 
 ## Plans, state, and queries
 
@@ -107,57 +231,45 @@ An output `value_type` must be default-constructible and support non-throwing as
 The CSV program accepts `B,bid,ask`, `T,price`, `R`, and `Q`. `R` clears both history windows; `Q` queries both outputs at that point in the stream. Blank lines and lines beginning with `#` are skipped. The parser checks field counts, finite numbers, bid/ask ordering, and the presence of a book record before the first trade. Errors include a line number and produce a nonzero exit status. Standard input is supported:
 
 ```sh
-printf 'B,100,102\nT,103\nT,103\nQ\n' | ./build-gcc/csv_replay -
+printf 'B,100,102\nT,103\nT,103\nQ\n' | ./build-make/csv_replay -
 ```
 
-To use the library as a subdirectory:
-
-```cmake
-add_subdirectory(FlexModelPlanner)
-target_link_libraries(my_program PRIVATE flexmodel::flexmodel)
-```
-
-You can also install it and consume its CMake package:
+To use the library, add its `include/` directory to your compiler's header search path:
 
 ```sh
-cmake --install build-gcc --prefix /your/install/prefix
+g++ -std=c++20 -I/path/to/FlexModelPlanner/include my_program.cpp -o my_program
 ```
 
-```cmake
-find_package(FlexModelPlanner 1 CONFIG REQUIRED)
-target_link_libraries(my_program PRIVATE flexmodel::flexmodel)
+There is no library binary to link. To install the headers under a chosen prefix:
+
+```sh
+make install PREFIX="$HOME/.local"
+g++ -std=c++20 -I"$HOME/.local/include" my_program.cpp -o my_program
 ```
 
-Add the installation prefix to `CMAKE_PREFIX_PATH` when configuring the consuming project. Alternatively, add this repository's `include/` directory directly to your compiler's header search path.
+`DESTDIR` is supported for staged installation. `make clean` removes the selected `BUILD_DIR`; by default this is `build-make`.
 
 ## Validation and development
 
-See [SPECS.md](SPECS.md) for the behavior contract, [AGENTS.md](AGENTS.md) for development conventions, and the [architecture notes](docs/architecture.md) for implementation structure and constraints. Tests cover event history, action ordering, query deduplication, root selection, instance isolation, independent arithmetic oracles, static/interpreted equivalence, replay, and allocation behavior. Negative tests compile separate CMake projects and check the intended diagnostic on every compiler.
+See [SPECS.md](SPECS.md) for the behavior contract, [AGENTS.md](AGENTS.md) for development conventions, and the [architecture notes](docs/architecture.md) for implementation structure and constraints. Tests cover event history, action ordering, query deduplication, root selection, instance isolation, independent arithmetic oracles, static/interpreted equivalence, replay, and allocation behavior. Negative tests invoke the selected compiler on each invalid program and require the intended diagnostic, not just a nonzero exit status.
 
 The action-ordering test also enumerates all 65,536 directed graphs over four actions and all 16 root subsets: 1,048,576 cases in total. Independent reachability analysis and Kahn's algorithm check the production planner's cycle detection, action set, and dependency ordering.
 
 The [verification report](docs/verification.md) records the formal models, their mapping to the code, bounded-check results, and the C++, floating-point, and runtime concerns outside those models. The project uses the [MIT license](LICENSE).
 
 ```sh
-bash tla/check.sh
+make model-check
 ```
 
 Model checking requires Java 17+, Bash, and curl. On its first run, the script downloads a pinned TLA+ tools version and verifies its SHA-256 hash. Results are written to `build-tla/`. Set `TLA_TOOLS_JAR` to use a local copy of the same version. CI runs this check as well.
 
 ```sh
-cmake -S . -B build-clang -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-clang --parallel
-ctest --test-dir build-clang --output-on-failure
-
-cmake -S . -B build-sanitize -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DFLEXMODEL_SANITIZERS=ON
-cmake --build build-sanitize --parallel
-ctest --test-dir build-sanitize --output-on-failure
+make -j test CXX=clang++ BUILD_DIR=build-clang
+make -j sanitize
 ```
 
 The optional microbenchmark processes a trade and immediately queries both outputs on the same graph. After 10,000 warm-up iterations, it reports elapsed time divided by the iteration count. It prints results only if both execution paths produce the same checksum. This measures average iteration time, not tail latency or performance across machines:
 
 ```sh
-cmake -S . -B build-bench -DCMAKE_BUILD_TYPE=Release -DFLEXMODEL_BUILD_BENCHMARKS=ON
-cmake --build build-bench --parallel
-./build-bench/dispatch_benchmark 1000000
+make benchmark
 ```

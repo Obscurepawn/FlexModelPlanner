@@ -1,0 +1,13 @@
+From this bundle directory, with Python 3.10+, Graphviz dot and DejaVu Sans:
+
+# Re-extract the 8 nodes and 13 typed input edges from the frozen C++ source.
+python3 code/make_composite_inputs.py --source inputs/composite_feature.cpp --output regenerated.json
+# Render into a new, empty directory.
+python3 code/render_architecture.py --input regenerated.json --output replay
+
+From the repository root, refresh against current source instead:
+python3 docs/figures/make_composite_inputs.py
+python3 docs/figures/render_composite_feature.py --input docs/figures/inputs/composite-feature.json --output build-figures/composite-feature
+
+The extractor deliberately accepts this explicit graph declaration, not general C++.
+Graphviz and font versions affect geometry. PDF metadata timestamps may differ.

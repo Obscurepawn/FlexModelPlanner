@@ -4,25 +4,20 @@ Local acceptance covers GCC, Clang, ASan/UBSan, independent graph algorithm chec
 
 ## Reproducing the checks
 
-Run from the repository root:
+Run from the repository root with GNU Make, a C++20 GCC/Clang toolchain, a POSIX shell, and Python 3:
 
 ```sh
-cmake -S . -B build-gcc -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++
-cmake --build build-gcc --parallel
-ctest --test-dir build-gcc --output-on-failure
-
-cmake -S . -B build-clang -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-clang --parallel
-ctest --test-dir build-clang --output-on-failure
-
-cmake -S . -B build-sanitize -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DFLEXMODEL_SANITIZERS=ON
-cmake --build build-sanitize --parallel
-ctest --test-dir build-sanitize --output-on-failure
-
-bash tla/check.sh
+make -j4 test CXX=g++ BUILD_DIR=build-make-gcc
+make -j4 test CXX=clang++ BUILD_DIR=build-make-clang
+make sanitize SANITIZE_CXX=clang++
+make model-check
 ```
 
-The last command requires Java (17+ recommended), Bash, curl, and either `sha256sum` or `shasum`. If TLC is missing locally, the script downloads the pinned 1.7.4 release and verifies its SHA-256 checksum. `TLA_TOOLS_JAR` can point to a local copy of that release. The script checks fingerprints of the modeled source files, runs every configuration in [models.tsv](../tla/models.tsv), and checks action coverage. An unregistered configuration, changed source file, failed check, or model action that never fires causes the script to fail. Logs are written to `build-tla/`.
+The Make test target also installs the headers into a temporary prefix and compiles an independent consumer against that installation. Keep separate `BUILD_DIR` directories for different compilers or flags. Sanitizer output defaults to `build-make-sanitize`.
+
+The CI configuration retains Linux GCC/Clang, macOS Clang, Linux sanitizers, and model checks. Its Windows job uses the [official MSYS2 setup action](https://github.com/msys2/setup-msys2) with UCRT64, MinGW GCC, GNU Make, and UCRT Python, following the [MSYS2 CI instructions](https://www.msys2.org/docs/ci/). Windows commands run inside the UCRT64 shell. The table below records local checks; hosted results are available in [GitHub Actions](https://github.com/Obscurepawn/FlexModelPlanner/actions/workflows/ci.yml). Native MSVC invocation is outside the provided Make interface.
+
+`make model-check` invokes `tla/check.sh` and requires Java (17+ recommended), Bash, curl, and either `sha256sum` or `shasum`. If TLC is missing locally, the script downloads the pinned 1.7.4 release and verifies its SHA-256 checksum. `TLA_TOOLS_JAR` can point to a local copy of that release. The script checks fingerprints of the modeled source files, runs every configuration in [models.tsv](../tla/models.tsv), and checks action coverage. An unregistered configuration, changed source file, failed check, or model action that never fires causes the script to fail. Logs are written to `build-tla/`.
 
 When a source fingerprint changes, review the correspondence between model and implementation before updating fingerprints and line anchors. Rerunning an old model alone does not establish that it still represents the new code. [PROFILE](../tla/PROFILE.md) records concurrency and fault assumptions; [MEMORY](../tla/MEMORY.md) tracks model status.
 
@@ -35,9 +30,10 @@ When a source fingerprint changes, review the correspondence between model and i
 | Actual DFS implementation | `test_planner_properties` enumerates all directed graphs on 4 actions (65,536 graphs) × 16 root sets: 1,048,576 cases, with 98,033 acyclic reachable closures and 950,543 cases containing a reachable cycle; 0 failures | Uses independent reachability and cycle detection as the reference; covers the action helper, not template instantiations of arbitrary size |
 | Planning with typed dependencies | Three L0 TLC configurations check root closure, event-specific dependencies, DFS, completeness, minimality, ordering, deduplication, and termination | 2 nodes, up to 2 event kinds, and up to 2 declared inputs in total; verifies planning subroutines |
 | Event history, windows, queries, offline replay | Two L1 TLC configurations execute the example's callback steps and compare them with an independent chronological sample list | Fixed example graph, small integer inputs, windows 1/2 or 2/3, and at most 5/6 records |
+| Composite feature in the README | GCC/Clang compile and run the complete example; score changes from 0.0625 to -0.25 after reset, fair value stays 101, and actual action plans match the documented sequences | This eight-node EMA example is separate from the rolling-window example modeled in L1 |
 | Dynamic allocation | A dedicated test counts calls to the C++ `new` family; the runtime count is 0 | Covers the framework and tested paths; arbitrary `malloc` calls and custom allocators are not counted, and user callbacks may allocate |
-| Memory safety and undefined behavior | Clang Debug with ASan + UBSan: 27/27 CTest checks pass, with no reports | Covers paths exercised by the tests |
-| Examples, CSV, installation, public headers | GCC/Clang Release each pass 27/27 CTest checks, including examples, valid/invalid CSV inputs, and an installed `find_package` consumer; a custom include installation directory and standalone compilation of all six headers also pass | MSVC acceptance was not run locally |
+| Memory safety and undefined behavior | `make sanitize` with Clang ASan + UBSan passes 27/27 checks, with no reports | Covers paths exercised by the tests |
+| Examples, CSV, installation, public headers | GCC 13.3 and Clang 18.1.3 each pass 27/27 `make test` checks, including examples, valid/invalid CSV inputs, and an independent consumer using only headers installed by `make install`; all six public headers also passed standalone compilation | See hosted CI for macOS and Windows UCRT64/MinGW results |
 | Plan printing and build packaging | Examples print actual plans; an independent consumer builds and runs against the installation prefix | These formatting and integration behaviors are checked through C++ builds, not modeled in TLA+ |
 
 ## TLC results

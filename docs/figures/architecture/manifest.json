@@ -5,35 +5,35 @@
   "inputs": [
     {
       "path": "inputs/architecture.json",
-      "sha256": "896f471dae533a5fcac9317dcb12c0962ad62472bddf77f82a64fbfe39e20e8e",
+      "sha256": "e837d4b23a91f83a7dbab963aee73af11eea32bcfe2036434be14f8f56cfc9d9",
       "role": "specification"
     },
     {
       "path": "code/render_architecture.py",
-      "sha256": "cb4cd549aaaddbbbb51838a36372827538170c172c5e663a6352f4134cd431ab",
+      "sha256": "271bc104ef1b005c22ec36fe7a0156ddf6790d28a7f60cce48c3c6d83e70e748",
       "role": "renderer"
     }
   ],
   "outputs": [
     {
       "path": "architecture.dot",
-      "sha256": "67635ac395c2b525ad0ff21aba836d484d6bbe7ce2002d3283fd6c0067779f9b"
+      "sha256": "df4baf5b846e646113e0bf79270a7d565194758787cf1d02b62863d5cc247fde"
     },
     {
       "path": "architecture.svg",
-      "sha256": "ba23b379f9d39d233f3239dff4c46ce4505997b773daa93a09c51ac9326229a4"
+      "sha256": "393735be7ab34507cb08b331cb60c2f1003b1f5c81da6826b9156ae6c1e41ff0"
     },
     {
       "path": "architecture.pdf",
-      "sha256": "200fedccc1ae2e272bc328faa50dc5c79519014492c3e277740707d06a6e85c4"
+      "sha256": "30693fe309f1adefff3ffbae5bcfacf58841ae87256b71239c5619c42fefc6cb"
     },
     {
       "path": "architecture.png",
-      "sha256": "f979cd4f49aa09114ca05b5724bd9ed24e66d10ab6d9319dc063f632ed54de31"
+      "sha256": "3a90810315bec7b7d7f987ae2fb61c24662fdcb5e58c6319826e3641fc1cc07f"
     },
     {
       "path": "caption.txt",
-      "sha256": "37b042f2725b279ea84162bdfc47206204b5cb6519bc950bc90c87ed93d15de8"
+      "sha256": "fac172cc56899311ee0378d43de2bdae29fd3791fcc5ff8a5b52d609dcb2075b"
     },
     {
       "path": "reproduce.txt",
@@ -41,7 +41,7 @@
     }
   ],
   "parameters": {
-    "title": "FlexModelPlanner: declarations, plans and one engine instance",
+    "title": "FlexModelPlanner Architecture",
     "data_kind": "observed",
     "source": "Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
     "rankdir": "TB",

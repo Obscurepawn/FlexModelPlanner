@@ -1,5 +1,5 @@
 {
-  "title": "FlexModelPlanner: declarations, plans and one engine instance",
+  "title": "FlexModelPlanner Architecture",
   "data_kind": "observed",
   "source": "Implemented C++20 source snapshot, identified by the file SHA-256 values accompanying each evidence reference. No runtime latency is encoded.",
   "rankdir": "TB",

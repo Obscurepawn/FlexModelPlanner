@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "automatic_status": "pass",
+  "human_review": "required",
+  "issues": [],
+  "measurements": {
+    "architecture.svg": {
+      "text_elements": 32,
+      "viewBox": [
+        0.0,
+        0.0,
+        1059.0,
+        360.51
+      ],
+      "obviously_hidden_elements": 0,
+      "definition_text_elements": 0
+    },
+    "architecture.pdf": {
+      "pages": 1,
+      "text_lines": 32,
+      "minimum_font_pt": 11.000244140625,
+      "possible_collisions": 0
+    }
+  },
+  "scope": "Hashes, formats and supported text/panel geometry only; no proof of data authenticity, inference, complete collision freedom or semantic correctness."
+}

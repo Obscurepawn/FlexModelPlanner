@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <new>
 #include <tuple>
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #include <malloc.h>
 #endif
 
@@ -22,7 +22,7 @@ void* allocate(std::size_t size) {
 }
 void* allocate_aligned(std::size_t size, std::size_t alignment) {
     note_allocation();
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     if (void* result = _aligned_malloc(size ? size : 1, alignment)) return result;
 #else
     void* result = nullptr;
@@ -31,7 +31,7 @@ void* allocate_aligned(std::size_t size, std::size_t alignment) {
     throw std::bad_alloc();
 }
 void free_aligned(void* p) noexcept {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     _aligned_free(p);
 #else
     std::free(p);

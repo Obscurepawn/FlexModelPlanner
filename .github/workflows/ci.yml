@@ -1,5 +1,7 @@
 name: build-and-test
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
     strategy:
@@ -9,26 +11,48 @@ jobs:
           - {os: ubuntu-latest, compiler: g++}
           - {os: ubuntu-latest, compiler: clang++}
           - {os: macos-latest, compiler: clang++}
-          - {os: windows-latest, compiler: msvc}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Configure GCC or Clang
-        if: matrix.compiler != 'msvc'
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DFLEXMODEL_BUILD_BENCHMARKS=ON
-      - name: Configure MSVC
-        if: matrix.compiler == 'msvc'
-        run: cmake -S . -B build -DFLEXMODEL_BUILD_BENCHMARKS=ON
-      - run: cmake --build build --config Release --parallel
-      - run: ctest --test-dir build -C Release --output-on-failure --parallel 2
-      - run: cmake --install build --config Release --prefix install
-  sanitizers:
-    runs-on: ubuntu-latest
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Build and test
+        run: make -j2 test CXX=${{ matrix.compiler }} BUILD_DIR=build-ci
+      - name: Build and run the comparison benchmark
+        run: make benchmark CXX=${{ matrix.compiler }} BUILD_DIR=build-ci
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DFLEXMODEL_SANITIZERS=ON
-      - run: cmake --build build --parallel
-      - run: ctest --test-dir build --output-on-failure --parallel 2
+      # Official setup: https://www.msys2.org/docs/ci/
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            make
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-python
+      - name: Build and test with MinGW GCC
+        run: make -j2 test CXX=g++ BUILD_DIR=build-ci PYTHON=python
+      - name: Build and run the comparison benchmark
+        run: make benchmark CXX=g++ BUILD_DIR=build-ci PYTHON=python
+  sanitizers:
+    runs-on: ubuntu-latest
+    env:
+      ASAN_OPTIONS: detect_leaks=1
+      UBSAN_OPTIONS: halt_on_error=1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Address and undefined-behavior sanitizers
+        run: make -j2 sanitize SANITIZE_CXX=clang++ BUILD_DIR=build-ci
   model-check:
     runs-on: ubuntu-latest
     steps:
@@ -37,4 +61,4 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - run: bash tla/check.sh
+      - run: make model-check

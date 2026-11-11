@@ -1,0 +1,15 @@
+{
+  "source": "examples/composite_feature.cpp",
+  "sha256": "c3f4a1f43504263ff6624956107c0dea12d5746bc13667e9d2607f8dd5a8f335",
+  "nodes": 8,
+  "edges": 13,
+  "state_to_eval_edges": 3,
+  "value_to_eval_edges": 8,
+  "value_to_trade_handler_edges": 2,
+  "reset_input_edges": 0,
+  "query_output_order": [
+    "Score",
+    "FairValue"
+  ],
+  "scope": "Declared node input dependencies; not an execution timeline."
+}
