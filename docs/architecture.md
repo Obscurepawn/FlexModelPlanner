@@ -1,39 +1,53 @@
-# From a graph to an event's call sequence
+# Architecture & Planner Internals
 
-The graph structure is a C++ type; state is data owned by an engine instance. `Id` separates node identity from the computation kernel, so the same `RecentDiffKernel` can serve both a 10-trade window and a 3-trade window. A state tuple supplies initial configuration. Plans contain only node indices and action kinds; they do not capture instance addresses.
+FlexModelPlanner separates **compile-time graph structure** from **per-instance runtime state**. A `graph<Nodes...>` type encodes topology, port bindings, and operation descriptors without allocating runtime metadata. Each `engine<Graph, Roots>` instance owns an isolated `state_tuple` and `value_tuple`. Node identity (`Id`) is decoupled from kernel implementation (`Kernel`), allowing a single kernel such as `RecentDiffKernel` in [examples/market_kernels.hpp](../examples/market_kernels.hpp) to back both a 10-trade and a 3-trade rolling window with distinct startup parameters.
 
-## Input ports and actions
+---
 
-Each handler binds an event type to a set of inputs. Each evaluator also declares its own inputs. `state_of<A>` provides read-only access to A's state; `value_of<A>` provides A's evaluator output. Callbacks receive only their own state and their declared inputs. A handler may modify its own state. An evaluator receives read-only state and returns a value, which the engine writes to its output slot.
+## Input Ports and Action Dependencies
 
-The planner orders actions in an action graph. If a consumer action C reads A, its prerequisites are:
+Every handler binds an `Event` type to a list of read-only input ports (`inputs<Ports...>`), and every evaluator declares its own read-only input ports:
 
-| Input | Prerequisites in the current event plan |
+- `state_of<A>` passes `const StateA&` from `A`'s state slot.
+- `value_of<A>` passes `const ValueA&` from `A`'s output slot (requiring `A` to declare `eval<...>`).
+
+Handlers receive mutable access only to their own state (`State&`); evaluators receive `const State&` and return `value_type` by value, which the engine assigns into the node's output slot.
+
+For a graph with `N` nodes, the planner constructs a `2N`-vertex action graph (`handle(0 .. N-1)` and `eval(0 .. N-1)`) specialized for each request kind:
+
+| Consumer port / request | Prerequisites in the compiled plan |
 |---|---|
-| `state_of<A>` | A's handler for the current event, if present |
-| `value_of<A>` | A's handler for the current event, if present, followed by A's eval |
-| A as a query output | A's eval and its recursive input dependencies; no handlers run |
+| `state_of<A>` in an event plan | `handle(A)` for the current event, if `A` subscribes to that event |
+| `value_of<A>` in an event plan | `handle(A)` for the current event (if present), followed by `eval(A)` |
+| `eval(X)` in an event plan | `handle(X)` for the current event (if present), plus `X`'s declared evaluator inputs |
+| `A` in `query<...>` | `eval(A)` and its transitive evaluator inputs; no handlers execute |
 
-Handlers and evaluators can therefore interleave. Each action has a separate visitation mark to prevent duplicate execution within a plan. Revisiting an action that is still being explored identifies a cycle. A cycle in the union of edges from different events does not imply a cycle in any individual event plan. Validation checks the action graph for each declared event and the query graph for each evaluator.
+Because an event handler can read `value_of<A>`, `.eval` and `.handle` actions naturally interleave within an event plan while executing at most once per plan. Cycles are checked per individual event action graph and on the evaluator query graph; edges from distinct events may form a cycle in their union as long as each single-event plan is a DAG.
 
-In the market example, BookEvent updates only the book. TradeEvent evaluates the mid before updating the two independent windows. Reset clears both windows, and a query evaluates their averages. The diagrams are generated from these declarations; their sources and reproduction commands are documented in the [figure directory](figures/README.md).
+---
 
-## Lifecycle and execution
+## Live Closure and Dispatch Paths
 
-The root set determines the live closure by following every handler and evaluator input of each reachable node. This selection happens at compile time. At runtime, each on call executes all live subscribers for that event, including nodes that have never been queried but must retain history for future queries.
+When `roots<Ids...>` is provided, `planner::live_nodes()` computes the compile-time transitive closure across **all** handler and evaluator inputs of reachable nodes. Every live node subscribing to `Event` runs its handler on every `on(Event)` call, preserving path-dependent state history even when no query follows.
 
-Static dispatch turns plan actions into calls whose types are known at compile time. Interpreted dispatch reads the same plan and selects the corresponding actions. It can check dispatch equivalence, but cannot independently detect a planning error shared by both paths. The tests supplement this comparison with hand-calculated expectations and a simple rolling-window oracle.
+`engine` provides two dispatch paths over the exact same `constexpr plan<N>` value:
 
-Value slots may remain stale after an event completes. `evaluate<Query>` computes values from the current state and returns borrowed references. Callers that need to retain results across evaluations copy them into their own tuple. Replay uses the same interfaces; the position of each query record determines which point in the event history it observes.
+1. **Static dispatch (`on`, `evaluate`)**: Expands `plan.actions[0 .. plan.size - 1]` via a `std::index_sequence` fold expression into a straight-line sequence of typed static calls.
+2. **Interpreted dispatch (`on_interpreted`, `evaluate_interpreted`)**: Loops over `plan` at runtime and invokes per-node function pointers from a `static constexpr` dispatch table.
 
-## Compile-time cost
+Because both paths consume the same `plan<N>`, agreement between them validates code generation rather than the planner itself; the test suite pairs differential dispatch checks with exhaustive small-graph verification (`tests/test_planner_properties.cpp`) and independent reference calculations.
 
-Declarations such as `node::operations` use ordinary `using` type aliases. They let the planner traverse operation types, resolve input IDs, and convert type declarations into arrays. No objects of these descriptor types are constructed at runtime.
+---
 
-The current implementation represents action dependencies with a `2N × 2N` Boolean matrix. DFS for a single plan scans O(N²) entries in the worst case. When a root set is specified, the three nested loops that compute the live closure perform O(N³) checks in the worst case. This work happens at compile time. Large graphs remain subject to compiler limits on constant-evaluation steps and template depth, as well as generated code size. The current validation establishes no compile-time or runtime performance results for graphs with thousands of nodes.
+## Compile-Time Complexity
 
-## Validation boundaries
+- **Action dependency matrix**: `action_graph<N>` represents prerequisites as a dense `2N × 2N` Boolean adjacency matrix (`std::array<std::array<bool, 2 * N>, 2 * N>`). Post-order DFS for a single plan inspects `O(N²)` entries in the worst case.
+- **Root reachability**: Computing `live_nodes()` for `roots<...>` performs a fixed-point pass in `O(N³)` constant-evaluation operations.
 
-Metadata validation checks for duplicate IDs, duplicate handlers for an event, duplicate evaluators, missing dependencies, and value dependencies on nodes without evaluators. Plan validation checks for action cycles. Callback validation checks inputs, return types, and `noexcept`. Callbacks remain ordinary C++; their authors control any external side effects and dynamic allocation.
+All traversal runs inside `consteval` functions using ordinary value-level arrays and loops rather than deep recursive class-template instantiations. Very large graphs remain bounded by the host compiler's `constexpr` step limit (`-fconstexpr-ops-limit` / `-fconstexpr-steps`) and generated code size.
 
-The library does not sort timestamps, persist checkpoints, ingest network data, or provide thread synchronization. CSV parsing happens before event dispatch and may allocate memory or report input errors. Hot-path allocation tests measure on/evaluate calls after startup has completed. The optional microbenchmark measures average iteration time for the example graph under the local build configuration.
+---
+
+## Scope Boundaries
+
+FlexModelPlanner focuses strictly on in-process compile-time planning, state isolation, allocation-free dispatch, and ordered range replay. Concerns outside this layer—network transport, timestamp alignment across feeds, input validation/parsing (such as `examples/csv_replay.cpp`), checkpoint serialization, and cross-thread synchronization—belong to the surrounding application.

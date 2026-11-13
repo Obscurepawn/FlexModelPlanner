@@ -1,26 +1,15 @@
-# Architecture, execution plans, and feature dependencies
+# Documentation Figures
 
-The architecture diagram shows where graph declarations, plans, and instance state belong. The event-plan diagram shows the actions executed by the same market graph for book updates, trades, resets, and queries. Boundaries distinguish compile-time metadata from a runtime engine instance; they are not process boundaries. Arrows in the plan diagram show execution order. In particular, an arrow between the two window handlers does not imply a data dependency.
+This directory contains the vector diagrams embedded in [README.md](../../README.md) together with their deterministic generator script:
 
-The diagrams describe the implemented code. `inputs/source-snapshot.json` records SHA-256 hashes of the relevant source files, and `inputs/plans.txt` contains the four plans printed by the example. `make_inputs.py` derives the event-plan diagram from that output. Architecture nodes and edges carry evidence references to code symbols and file hashes.
+- [composite-feature.svg](composite-feature.svg) ([PNG](composite-feature.png) · [PDF](composite-feature.pdf)) — Eight-node feature DAG and typed input ports (`state_of<Id>`, evaluator `value_of<Id>`, and `on<Trade>` `value_of<Id>`) declared in [examples/composite_feature.cpp](../../examples/composite_feature.cpp).
+- [architecture.svg](architecture.svg) ([PNG](architecture.png) · [PDF](architecture.pdf)) — Separation between `consteval` graph validation/planning and per-instance runtime storage and dispatch.
+- [execution-plans.svg](execution-plans.svg) ([PNG](execution-plans.png) · [PDF](execution-plans.pdf)) — The four specialized action sequences (`BookUpdate`, `Trade`, `Reset`, and `evaluate<Outputs>()`) compiled from `composite_feature.cpp`.
 
-- [Architecture SVG](architecture/architecture.svg) · [PDF](architecture/architecture.pdf) · [PNG](architecture/architecture.png) · [DOT](architecture/architecture.dot)
-- [Event plans SVG](event-plans/architecture.svg) · [PDF](event-plans/architecture.pdf) · [PNG](event-plans/architecture.png) · [DOT](event-plans/architecture.dot)
-- [Composite feature DAG](composite-feature/architecture.svg) · [PDF](composite-feature/architecture.pdf) · [PNG](composite-feature/architecture.png) · [DOT](composite-feature/architecture.dot)
+## Regenerating
 
-The composite feature diagram shows the eight nodes and thirteen input dependencies in [composite_feature.cpp](../../examples/composite_feature.cpp). Its edges distinguish state inputs, evaluator value inputs, and values read by the Trade handler. These are dependencies, rather than an execution sequence. Its extractor and bundled source snapshot make that mapping reproducible.
-
-Each diagram directory includes its JSON specification, a copy of the renderer, an environment and file-hash manifest, reproduction commands, automated checks, and visual-review notes. Labels use DejaVu Sans and preserve C++ identifiers. The diagrams are intended for display at roughly 900 pixels wide; open the SVG directly to inspect it at larger sizes.
-
-Regenerate the inputs, then render them into new, empty directories using the bundled renderer:
+`generate.py` verifies that `examples/composite_feature.cpp` still matches the expected 8-node, 13-port topology before writing SVG files and exporting PNG/PDF siblings via `rsvg-convert` (if installed):
 
 ```sh
-make build-make/recent_trade_vs_mid
-python3 docs/figures/make_inputs.py --example build-make/recent_trade_vs_mid
-python3 docs/figures/architecture/code/render_architecture.py --input docs/figures/inputs/architecture.json --output build-figures/architecture
-python3 docs/figures/event-plans/code/render_architecture.py --input docs/figures/inputs/event-plans.json --output build-figures/event-plans
-python3 docs/figures/make_composite_inputs.py
-python3 docs/figures/render_composite_feature.py --input docs/figures/inputs/composite-feature.json --output build-figures/composite-feature
+python3 docs/figures/generate.py
 ```
-
-Rendering requires Python 3.10+, Graphviz `dot`, and the DejaVu Sans font. These diagrams contain no measurements and do not establish performance or concurrency correctness.

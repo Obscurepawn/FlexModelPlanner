@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 456" width="980" height="456" role="img" aria-label="Composite Feature Dependency Graph">
+  <title>Composite Feature Dependency Graph</title>
+  <desc>Eight-node feature graph showing state_of reads, evaluator value_of reads, and Trade handler value_of reads in examples/composite_feature.cpp.</desc>
+  <defs>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#FFFFFF" stroke="#475569" stroke-width="1.4"/>
+    </marker>
+    <marker id="arrow-navy" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0.5 1.5 L 9 5 L 0.5 8.5 z" fill="#1E3A5F"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0.5 1.5 L 9 5 L 0.5 8.5 z" fill="#B45309"/>
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0.5 1.5 L 9 5 L 0.5 8.5 z" fill="#4338CA"/>
+    </marker>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0.5 1.5 L 9 5 L 0.5 8.5 z" fill="#0F766E"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+      <path d="M 0.5 1.5 L 9 5 L 0.5 8.5 z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="978" height="454" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="28" y="35" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="15" font-weight="700" fill="#0F172A">Composite Feature Dependency Graph</text>
+  <text x="28" y="54" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="11.5" fill="#64748B">Declared input ports in examples/composite_feature.cpp (producer &#8594; consumer)</text>
+  <rect x="510" y="16" width="442" height="48" rx="7" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="524" y1="32" x2="554" y2="32" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow-slate)"/>
+  <text x="562" y="36" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10.5" fill="#334155">state_of&lt;Id&gt;</text>
+  <line x1="688" y1="32" x2="718" y2="32" stroke="#1E3A5F" stroke-width="1.7" marker-end="url(#arrow-navy)"/>
+  <text x="726" y="36" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10.5" fill="#334155">value_of&lt;Id&gt; (eval)</text>
+  <line x1="524" y1="51" x2="554" y2="51" stroke="#B45309" stroke-width="1.7" stroke-dasharray="5,3.5" marker-end="url(#arrow-amber)"/>
+  <text x="562" y="55" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10.5" fill="#92400E">value_of&lt;Id&gt; (on&lt;Trade&gt;)</text>
+  <rect x="762" y="43" width="14" height="12" rx="3" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.8"/>
+  <text x="782" y="53" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="10.5" fill="#0F766E" font-weight="600">Queried in Outputs</text>
+  <path d="M 180.0 229.0 C 205.2 229.0, 210.8 128.0, 236.0 128.0" fill="none" stroke="#475569" stroke-width="1.65" marker-end="url(#arrow-slate)"/>
+  <path d="M 180.0 245.0 C 205.2 245.0, 210.8 245.0, 236.0 245.0" fill="none" stroke="#475569" stroke-width="1.65" marker-end="url(#arrow-slate)"/>
+  <path d="M 180.0 261.0 C 205.2 261.0, 210.8 360.0, 236.0 360.0" fill="none" stroke="#475569" stroke-width="1.65" marker-end="url(#arrow-slate)"/>
+  <path d="M 370.0 124.0 C 396.1 124.0, 401.9 121.0, 428.0 121.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 370.0 233.0 C 396.1 233.0, 401.9 139.0, 428.0 139.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 370.0 350.0 C 394.4 350.0, 403.6 157.0, 428.0 157.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 582.0 145.0 C 604.5 145.0, 609.5 191.0, 632.0 191.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 370.0 245.0 C 487.9 245.0, 514.1 207.0, 632.0 207.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 370.0 360.0 C 501.0 360.0, 501.0 221.0, 632.0 221.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 370.0 259.0 C 495.8 259.0, 506.2 337.0, 632.0 337.0" fill="none" stroke="#B45309" stroke-width="1.65" stroke-dasharray="6,4" marker-end="url(#arrow-amber)"/>
+  <path d="M 370.0 374.0 C 487.9 374.0, 514.1 361.0, 632.0 361.0" fill="none" stroke="#B45309" stroke-width="1.65" stroke-dasharray="6,4" marker-end="url(#arrow-amber)"/>
+  <path d="M 794.0 209.0 C 811.1 209.0, 814.9 257.0, 832.0 257.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <path d="M 794.0 343.0 C 811.1 343.0, 814.9 285.0, 832.0 285.0" fill="none" stroke="#1E3A5F" stroke-width="1.65" marker-end="url(#arrow-navy)"/>
+  <rect x="28" y="206" width="152" height="78" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.4"/>
+  <text x="104.0" y="228" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#1E3A8A">Book</text>
+  <text x="104.0" y="246" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">on&lt;BookUpdate&gt;</text>
+  <rect x="57.0" y="257" width="94.0" height="17" rx="8.5" fill="#DBEAFE"/>
+  <text x="104.0" y="269" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="9.5" font-weight="600" fill="#1D4ED8">state source</text>
+  <rect x="236" y="94" width="134" height="60" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.4"/>
+  <text x="303.0" y="120" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#0F172A">Imbalance</text>
+  <text x="303.0" y="139" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">eval(book)</text>
+  <rect x="236" y="215" width="134" height="60" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.4"/>
+  <text x="303.0" y="241" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#0F172A">Mid</text>
+  <text x="303.0" y="260" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">eval(book)</text>
+  <rect x="236" y="334" width="134" height="60" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.4"/>
+  <text x="303.0" y="360" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#0F172A">Spread</text>
+  <text x="303.0" y="379" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">eval(book)</text>
+  <rect x="428" y="98" width="154" height="78" rx="8" fill="#F0FDFA" stroke="#0F766E" stroke-width="2.0"/>
+  <text x="505.0" y="120" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#134E4A">FairValue</text>
+  <text x="505.0" y="138" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">eval(mid, spr, imb)</text>
+  <rect x="471.0" y="149" width="68.0" height="17" rx="8.5" fill="#CCFBF1"/>
+  <text x="505.0" y="161" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="9.5" font-weight="600" fill="#0F766E">query #2</text>
+  <rect x="632" y="174" width="162" height="62" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.4"/>
+  <text x="713.0" y="200" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#0F172A">BookBias</text>
+  <text x="713.0" y="219" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">eval(fair, mid, spr)</text>
+  <rect x="632" y="310" width="162" height="78" rx="8" fill="#FFFBEB" stroke="#D97706" stroke-width="1.4"/>
+  <text x="713.0" y="332" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#78350F">TradePressure</text>
+  <text x="713.0" y="350" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">on&lt;Trade&gt; · on&lt;Reset&gt;</text>
+  <rect x="653.0" y="361" width="120.0" height="17" rx="8.5" fill="#FEF3C7"/>
+  <text x="713.0" y="373" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="9.5" font-weight="600" fill="#B45309">EMA state + eval</text>
+  <rect x="832" y="232" width="120" height="78" rx="8" fill="#F0FDFA" stroke="#0F766E" stroke-width="2.0"/>
+  <text x="892.0" y="254" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="13" font-weight="700" fill="#134E4A">Score</text>
+  <text x="892.0" y="272" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="10" fill="#475569">eval(bias, ema)</text>
+  <rect x="858.0" y="283" width="68.0" height="17" rx="8.5" fill="#CCFBF1"/>
+  <text x="892.0" y="295" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="9.5" font-weight="600" fill="#0F766E">query #1</text>
+  <text x="28" y="436" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', sans-serif" font-size="10.5" fill="#64748B">Note: TradePressure::eval() reads only its own EMA state; Mid and Spread are evaluated for TradePressure solely during on(Trade).</text>
+</svg>

@@ -1,52 +1,86 @@
 # FlexModelPlanner
 
-FlexModelPlanner is a C++20 library for computing features from streams of events such as order-book updates, trades, and timers. It compiles node dependencies into a separate execution plan for each event type. Two trades at the same price still run the handler twice; queries compute values without advancing event history.
+**FlexModelPlanner** is a zero-dependency, header-only C++20 library for compiling and executing event-driven feature graphs over streaming data such as order-book updates, trades, and timers. Graph declarations, structural validation, and dependency scheduling happen entirely at compile time (`consteval`); at runtime, an `engine` instance owns isolated node state and dispatches events through unrolled static call sequences without dynamic allocation on the hot path.
 
-This is an independent implementation inspired by Jane Street's [Flex Model blog post](https://blog.janestreet.com/flex-model-an-event-driven-feature-engineering-system/). It provides static graph planning, state ownership, execution, and replay primitives. Applications supply market-data ingestion, timestamp ordering, and persistence.
+Unlike value-cutoff incremental frameworks, streaming feature computation is **path-dependent**: two consecutive trades at the same price are distinct market observations that must both advance a rolling window or exponential moving average, whereas querying outputs must inspect current features without mutating event history. FlexModelPlanner captures this distinction directly by separating **event handlers** (`on<Event>`, executed once per matching event to update private state) from **evaluators** (`eval`, executed on demand to project read-only values). The design is an independent C++20 implementation inspired by Jane Street's [Flex Model](https://blog.janestreet.com/flex-model-an-event-driven-feature-engineering-system/).
 
-## Quick start
+---
 
-You need GNU Make and a C++20 compiler; running the tests also requires Python 3. The library is header-only and has no third-party C++ dependencies. From the repository root, run:
+## Quick Start
+
+Building the examples requires GNU Make and a C++20 compiler (GCC or Clang); running the test suite additionally requires Python 3:
 
 ```sh
 make -j
-make test
+make -j test
 ./build-make/composite_feature
 ```
 
-The eight-node example combines current book liquidity with an EMA of trade-price dislocations. It queries Score and FairValue together, then resets the trade history and queries them again:
+To build with Clang or customize flags, use a separate `BUILD_DIR`:
 
-```text
-before reset: score=0.0625, fair=101.0000
-after reset: score=-0.2500, fair=101.0000
+```sh
+make -j test CXX=clang++ BUILD_DIR=build-clang
 ```
 
-The [next section](#defining-a-feature) shows the complete program and its DAG. The smaller [rolling-window example](examples/recent_trade_vs_mid.cpp) and [CSV replay tool](examples/csv_replay.cpp) are built alongside it.
+On Windows, run the same commands inside WSL2 or an MSYS2 UCRT64 shell with `make`, MinGW-w64 GCC, and Python installed (`make help` lists all targets and configurable variables).
 
-On Windows, use WSL2 or an MSYS2 UCRT64 shell with GNU Make, GCC, and Python installed. The same commands work there; native Windows executables have an `.exe` suffix. Use `make help` to list targets, and `CXX=clang++ BUILD_DIR=build-clang` to select Clang. Use separate build directories when changing compilers or build flags.
+---
 
-## Defining a feature
+## Background: Why Flex Model?
 
-This example combines current book liquidity with the history of trade prices. Its eight-node DAG contains shared inputs, several layers of evaluation, and a stateful node that updates on trades. An `Id` identifies a node, a `Kernel` implements its state and computation, and a `node` declares its handlers, evaluator, and input ports.
+In [*Flex Model: An Event-Driven Feature Engineering System*](https://blog.janestreet.com/flex-model-an-event-driven-feature-engineering-system/), Jane Street describes why general-purpose self-adjusting computation frameworks (such as their own **Incremental** library) are a poor fit for stateful market-data features:
 
-![Composite feature dependency graph](docs/figures/composite-feature/architecture.svg)
+1. **Cutoffs and coalescing corrupt event history**: Spreadsheet-like incremental DAGs optimize for point-in-time functions by coalescing bursts of updates and cutting off propagation when an intermediate value does not change. In market streams, however, every event is a distinct observation—two trades at the same price must both update an EMA or rolling count, and a trade handler reading mid-price must observe the book *at that exact trade*, not a coalesced batch.
+2. **Lazy evaluation conflicts with stateful updates**: Embedding mutable ring buffers or accumulators inside lazily evaluated nodes makes state depend on *when* downstream consumers happen to query the graph, breaking parity between live trading and offline research replay.
+3. **Static topology unlocks static scheduling**: Feature graphs rarely need to rewire themselves mid-run. By trading away runtime graph dynamism, the system can split every feature node into two explicit roles—**event handlers** that advance local state on every relevant event, and **pure evaluators** that compute values on demand—and compile a dedicated, minimal call schedule for each event type ahead of time.
 
-Arrows point from an input to its consumer. Mid, Spread, and Imbalance read **Book state**. All other edges read computed **values**. The two edges into TradePressure belong to its **Trade handler**; its evaluator only reads the EMA stored in its own state. Event delivery and Reset are omitted from this dependency view.
+**FlexModelPlanner** brings this core execution model to C++20 as a lightweight, independent library: graph topology, live-root pruning, and per-event/per-query topological schedules are computed entirely via `consteval` metaprogramming and unrolled into direct, inlinable static calls, while data ingestion, transport, and model inference remain cleanly decoupled in user code.
 
-| Node | Computation or stored state |
+---
+
+## Design Model & API Overview
+
+Everything is exposed under `namespace flexmodel` via `<flexmodel/flexmodel.hpp>`:
+
+| Construct | Role |
 |---|---|
-| Book | Latest bid, ask, and sizes, updated by `BookUpdate` |
-| Mid | `(bid + ask) / 2` |
-| Spread | `ask - bid` |
-| Imbalance | `(bid_size - ask_size) / (bid_size + ask_size)` |
-| FairValue | `mid + 0.5 * spread * imbalance`, the size-weighted microprice |
-| BookBias | `(fair - mid) / spread`, a dimensionless current-book signal |
-| TradePressure | An EMA of `(trade_price - mid) / spread`, sampled at each trade |
-| Score | `book_bias + trade_pressure` |
+| `node<Id, Kernel, Operations...>` | Binds a unique tag type `Id` to a `Kernel` (`state_type`, optional `value_type`) and its operations |
+| `graph<Nodes...>` | Declares a static feature topology across one or more `node` definitions |
+| `state_of<Id>` / `value_of<Id>` | Typed read-only input ports reading a producer's `state_type` or evaluated `value_type` |
+| `on<Event, Inputs, Fn>` | Subscribes a node to `Event`; mutates the node's own state (`Kernel::handle` by default) |
+| `eval<Inputs, Fn>` | Computes `Kernel::value_type` from `const state_type&` and inputs (`Kernel::eval` by default) |
+| `engine<Graph, Roots>` | Owns per-instance state and output slots; `roots<Ids...>` prunes unreachable subgraphs at compile time |
+| `query<Ids...>` / `evaluate<Query>()` | Evaluates the deduplicated dependency closure and borrows `std::tuple<const Value&...>` |
+| `evaluate_into<Query>(tuple&)` | Evaluates `Query` and copies outputs into caller-owned storage |
+| `replay(engine, range, observer)` | Dispatches typed or `std::variant` event streams in input order |
+| `event_plan<E>()` / `query_plan<Q>()` / `dump_plan` | Exposes and formats compiled `constexpr plan<N>` action sequences for inspection |
 
-The first trade initializes the EMA; later trades give equal weight to the previous EMA and the new sample. Zero total size produces zero imbalance, and a nonpositive spread produces zero normalized bias/sample. The supplied events use finite, valid quotes and nonnegative sizes; input validation belongs at the application boundary.
+![Compile-time planning vs. runtime execution](docs/figures/architecture.svg)
 
-The complete program is also available as [composite_feature.cpp](examples/composite_feature.cpp):
+At compile time, `engine<Graph, Roots>` validates node IDs, port targets, `noexcept` callback signatures, and per-event/per-query acyclicity. When `roots<Ids...>` is supplied instead of the default `all_nodes`, the planner computes the transitive dependency closure across all handler and evaluator inputs of reachable nodes, excluding dead nodes from generated plans while preserving a uniform `state_tuple` layout.
+
+Generated `plan<N>` objects hold only `{node_index, action_kind}` entries—never instance pointers. Multiple `engine` instances can therefore be constructed, moved, or run on separate threads without replanning or shared mutable state.
+
+---
+
+## Walkthrough: Composite Market Feature
+
+The [composite_feature.cpp](examples/composite_feature.cpp) example combines instantaneous order-book liquidity with an exponential moving average (EMA) of trade-price dislocations across an eight-node DAG:
+
+![Composite feature dependency graph](docs/figures/composite-feature.svg)
+
+| Node | Role and formula |
+|---|---|
+| `Book` | Stores latest quote (`bid`, `ask`, `bid_size`, `ask_size`) on `BookUpdate` |
+| `Mid` | `(bid + ask) / 2` from `state_of<BookId>` |
+| `Spread` | `ask - bid` from `state_of<BookId>` |
+| `Imbalance` | `(bid_size - ask_size) / (bid_size + ask_size)` (`0` when total size is `0`) |
+| `FairValue` | Size-weighted microprice: `mid + 0.5 * spread * imbalance` |
+| `BookBias` | Normalized book signal: `(fair - mid) / spread` (`0` when `spread <= 0`) |
+| `TradePressure` | Stateful EMA (`α = 0.5`) of `(trade.price - mid) / spread`, updated on `Trade` and cleared on `Reset` |
+| `Score` | Composite signal: `book_bias + trade_pressure` |
+
+### Complete Program
 
 ```cpp
 #include <flexmodel/flexmodel.hpp>
@@ -174,96 +208,99 @@ int main() {
 }
 ```
 
-After `make`, run `./build-make/composite_feature` to get:
+Running `./build-make/composite_feature` prints:
 
 ```text
 before reset: score=0.0625, fair=101.0000
 after reset: score=-0.2500, fair=101.0000
 ```
 
-The trade samples are `0.5, 0.25, 0.25`, so the EMA evolves through `0.5, 0.375, 0.3125`. The two trades at 103 are separate updates even though their prices match. At the final book, fair value is 101 and book bias is -0.25; adding the EMA gives 0.0625. Reset clears the EMA while preserving the book, leaving a score of -0.25.
+Across the three trades, `(price - mid) / spread` evaluates to `0.5`, `0.25`, and `0.25`, stepping the EMA through `0.5 → 0.375 → 0.3125`—the second `Trade{103.0}` updates state even though its price is unchanged. On the second book (`mid = 102`, `spread = 4`, `imbalance = -0.5`), `fair` is `101.0` and `book_bias` is `-0.25`, yielding `score = -0.25 + 0.3125 = 0.0625`. Dispatching `Reset{}` zeroes the EMA while leaving `Book` intact, so `score` becomes `-0.2500`.
 
-The same graph yields different plans:
+### Specialized Per-Event and Query Plans
 
-| Request | Actions in execution order |
-|---|---|
-| `BookUpdate` | `Book.handle` |
-| `Trade` | `Mid.eval → Spread.eval → TradePressure.handle` |
-| `Reset` | `TradePressure.handle` for Reset only |
-| `evaluate<Outputs>()` | `Mid.eval → Spread.eval → Imbalance.eval → FairValue.eval → BookBias.eval → TradePressure.eval → Score.eval` |
+From that single `Graph` definition, the planner synthesizes four distinct static call sequences:
 
-Querying Score and FairValue together computes each shared action once. For example, FairValue is both an output and an input to BookBias. The plan executes FairValue before Score, while the returned tuple follows `query<ScoreId, FairValueId>` and therefore contains `(score, fair)`.
+![Per-request static execution plans](docs/figures/execution-plans.svg)
 
-`roots<ScoreId>` keeps all eight nodes live because they lie in Score's dependency closure. TradePressure receives every trade even when no query follows, and evaluating its stored EMA does not advance history. Reset has no input ports, so it does not compute Mid or Spread.
+Key properties of the compiled plans:
 
-Input port order determines callback argument order: `on<Trade, inputs<value_of<MidId>, value_of<SpreadId>>>` calls `handle(State&, const Trade&, const double& mid, const double& spread)`. Callbacks receive their own state and their declared inputs, rather than an engine-wide context. Use `on<Event, Inputs, &function>` or `eval<Inputs, &function>` when a kernel needs an explicitly selected callback.
+- **Minimal event work**: `on(Trade)` evaluates `Mid` and `Spread` because `TradePressure`'s `Trade` handler declares them as `value_of` ports, while leaving `Imbalance`, `FairValue`, `BookBias`, and `Score` untouched. `on(Reset)` declares no inputs and invokes `TradePressure.handle` directly.
+- **Shared-subgraph deduplication**: `evaluate<Outputs>()` computes `Mid`, `Spread`, and `FairValue` once even though `FairValue` is both a requested query output and an input to `BookBias`. Execution follows dependency order (`FairValue` before `Score`), whereas the returned tuple matches `query<ScoreId, FairValueId>` (`score`, then `fair`).
+- **Explicit port binding & kernel reuse**: Callback argument order mirrors `inputs<...>` port order; kernels never receive an opaque engine-wide context. Explicit function pointers or stateless callables can override defaults via `on<Event, Inputs, &fn>` and `eval<Inputs, &fn>`.
+- **Runtime configuration**: While topology is fixed at compile time, node state is ordinary runtime data. In [market_kernels.hpp](examples/market_kernels.hpp), a single `RecentDiffKernel` backs both 10-trade and 3-trade rolling windows under separate node IDs, parameterized at startup via `engine(state_tuple)`.
 
-The graph is fixed at compile time; configuration can still be ordinary instance data. For example, [market_kernels.hpp](examples/market_kernels.hpp) receives its rolling-window sizes through `make_engine(10, 3)`.
+---
 
-## Plans, state, and queries
+## Execution Semantics & Guarantees
 
-![Architecture](docs/figures/architecture/architecture.svg)
+- **Zero-copy queries vs. owned snapshots**: `evaluate<Query>()` returns `std::tuple<const Value&...>` borrowing directly from the engine's internal value slots. References remain valid until the engine is moved or destroyed, and slot contents may be updated by subsequent evaluations. Call `evaluate_into<Query>(dest_tuple)` when retaining an independent copy. `state<Id>()` exposes read-only node state; `cached_value<Id>()` reads an output slot without triggering evaluation.
+- **Hot-path allocation**: Plan construction allocates nothing at runtime. Kernels may allocate during startup in `state_type` constructors (such as sizing ring buffers once), after which framework dispatch in `on()` and `evaluate()` performs zero dynamic allocations.
+- **Exceptions and concurrency**: All handler and evaluator callbacks are statically verified as `noexcept`, and evaluator `value_type` slots require `noexcept` assignment. Each `engine` instance is single-threaded and non-reentrant; separate instances share no mutable state and can run concurrently across threads without synchronization.
+- **Diagnostics and differential execution**: `engine::event_plan<Event>()` and `engine::query_plan<Query>()` return `constexpr plan<N>` values printable with `dump_plan`. `on_interpreted` and `evaluate_interpreted` execute the same `plan<N>` through a function-pointer table for differential testing against the unrolled dispatcher.
 
-By default, `engine<Graph>` schedules all nodes. `engine<Graph, roots<FeatureId>>` schedules only the selected roots and the transitive closure of their operation dependencies. Handlers in that live closure run on every matching event, even when no query follows. Root selection reduces scheduled work; the state tuple still contains every node in the graph. Query outputs must belong to the live closure and have an evaluator.
+---
 
-The planner treats a node's handler and evaluator as separate actions. Before a state read, it runs the producer's handler for the current event, if one exists. A value read also requires the producer's evaluator. Each shared action runs once per plan. Consecutive queries each perform their own evaluation; there is no memoization across queries or cutoff across events.
+## Stream Replay
 
-`evaluate<query<A, B>>()` computes both outputs together and evaluates shared dependencies once. Its `tuple<const Value&...>` borrows references to the engine's output slots, which later evaluations may update. To retain a snapshot, use `evaluate_into<Query>(output_tuple)` to copy values into caller-owned storage. `state<Id>()` exposes a read-only state view; `cached_value<Id>()` explicitly permits a stale value.
+`flexmodel::replay(engine, records, observer)` (and `replay_interpreted`) processes any `std::ranges::input_range` of concrete event structs or `std::variant<Events...>` values in input order, invoking the optional `observer(engine, event, index)` after each event. Applications control timestamp ordering, I/O framing, and persistence outside the engine.
 
-![Event execution plans](docs/figures/event-plans/architecture.svg)
-
-`event_plan<Event>()` and `query_plan<Query>()` expose inspectable plans; `dump_plan` prints them for diagnostics. The default executor expands actions into direct template calls. `on_interpreted` and `evaluate_interpreted` dispatch the same plan one action at a time for comparison. Because both executors share the planner, the tests also use independent arithmetic oracles.
-
-Kernel state may allocate at startup. The example's ring buffers do not grow after initialization, and its callbacks and scalar outputs do not allocate. A dedicated test tracks the C++ `new` family: its zero-allocation result covers framework dispatch and the tested example paths. Arbitrary `malloc` calls, custom allocators, and allocations in user kernels remain the application's responsibility to check.
-
-An output `value_type` must be default-constructible and support non-throwing assignment from the returned value. Neither `noexcept` nor read-only parameters guarantee freedom from global side effects. Each engine is single-threaded and non-reentrant; separate instances may be owned by separate threads.
-
-## Replay and integration
-
-`replay(engine, range)` processes a range of typed or `std::variant` events in input order. An optional observer receives `(engine, event, index)` after each event. `replay_interpreted` uses the interpreter.
-
-The CSV program accepts `B,bid,ask`, `T,price`, `R`, and `Q`. `R` clears both history windows; `Q` queries both outputs at that point in the stream. Blank lines and lines beginning with `#` are skipped. The parser checks field counts, finite numbers, bid/ask ordering, and the presence of a book record before the first trade. Errors include a line number and produce a nonzero exit status. Standard input is supported:
+The repository includes a standalone CLI replay example ([examples/csv_replay.cpp](examples/csv_replay.cpp)) supporting `B,bid,ask` (book), `T,price` (trade), `R` (reset), and `Q` (query) records from a file or standard input:
 
 ```sh
 printf 'B,100,102\nT,103\nT,103\nQ\n' | ./build-make/csv_replay -
 ```
 
-To use the library, add its `include/` directory to your compiler's header search path:
+---
+
+## Integration & Installation
+
+FlexModelPlanner is header-only with no external C++ dependencies. Point your C++20 compiler at `include/`:
 
 ```sh
-g++ -std=c++20 -I/path/to/FlexModelPlanner/include my_program.cpp -o my_program
+g++ -std=c++20 -O2 -I/path/to/FlexModelPlanner/include my_program.cpp -o my_program
 ```
 
-There is no library binary to link. To install the headers under a chosen prefix:
+To install headers under a prefix (with optional `DESTDIR` staging for packaging):
 
 ```sh
 make install PREFIX="$HOME/.local"
-g++ -std=c++20 -I"$HOME/.local/include" my_program.cpp -o my_program
+g++ -std=c++20 -O2 -I"$HOME/.local/include" my_program.cpp -o my_program
 ```
 
-`DESTDIR` is supported for staged installation. `make clean` removes the selected `BUILD_DIR`; by default this is `build-make`.
+---
 
-## Validation and development
+## Verification & Benchmarks
 
-See [SPECS.md](SPECS.md) for the behavior contract, [AGENTS.md](AGENTS.md) for development conventions, and the [architecture notes](docs/architecture.md) for implementation structure and constraints. Tests cover event history, action ordering, query deduplication, root selection, instance isolation, independent arithmetic oracles, static/interpreted equivalence, replay, and allocation behavior. Negative tests invoke the selected compiler on each invalid program and require the intended diagnostic, not just a nonzero exit status.
+Detailed contracts and verification artifacts live in:
 
-The action-ordering test also enumerates all 65,536 directed graphs over four actions and all 16 root subsets: 1,048,576 cases in total. Independent reachability analysis and Kahn's algorithm check the production planner's cycle detection, action set, and dependency ordering.
+- [SPECS.md](SPECS.md) — Normative API synopsis, type requirements, scheduling rules, and lifetime contracts.
+- [docs/architecture.md](docs/architecture.md) — Planner internals, compile-time complexity, and memory layout.
+- [docs/verification.md](docs/verification.md) — Test matrix and bounded TLA+/TLC model-checking report.
+- [AGENTS.md](AGENTS.md) — Contributor invariants and verification gates.
 
-The [verification report](docs/verification.md) records the formal models, their mapping to the code, bounded-check results, and the C++, floating-point, and runtime concerns outside those models. The project uses the [MIT license](LICENSE).
+The test and verification suite checks multiple independent layers:
+
+1. **Functional, replay, and allocation tests (`make test`)**: Verifies event history, shared-dependency deduplication, root pruning, instance isolation, static vs. interpreted equivalence, independent arithmetic reference oracles, zero C++ `new` calls on the hot path (`tests/test_noalloc.cpp`), and a staged `make install` consumer build.
+2. **Exhaustive small-graph planner verification**: `tests/test_planner_properties.cpp` enumerates all `65,536` (`2^16`) directed graphs over 4 actions across all `16` root subsets (`1,048,576` cases), checking cycle rejection, reachability, and topological order against independent reference algorithms.
+3. **Diagnostic-checked negative compilation tests**: 19 invalid programs in `tests/compile_fail/` are compiled under `-fsyntax-only`, asserting the exact expected diagnostic message for each structural, signature, `noexcept`, or cycle violation.
+4. **Sanitizers & formal model checking**:
 
 ```sh
+make -j sanitize SANITIZE_CXX=clang++
 make model-check
 ```
 
-Model checking requires Java 17+, Bash, and curl. On its first run, the script downloads a pinned TLA+ tools version and verifies its SHA-256 hash. Results are written to `build-tla/`. Set `TLA_TOOLS_JAR` to use a local copy of the same version. CI runs this check as well.
+`make model-check` runs five bounded TLA+/TLC specifications (requiring Java 17+, Bash, and `curl`; downloads and SHA-256-verifies `tla2tools.jar` on first run unless `TLA_TOOLS_JAR` is set).
 
-```sh
-make -j test CXX=clang++ BUILD_DIR=build-clang
-make -j sanitize
-```
-
-The optional microbenchmark processes a trade and immediately queries both outputs on the same graph. After 10,000 warm-up iterations, it reports elapsed time divided by the iteration count. It prints results only if both execution paths produce the same checksum. This measures average iteration time, not tail latency or performance across machines:
+An optional microbenchmark compares unrolled static dispatch against `plan<N>` interpretation (verifying matching output checksums after warm-up):
 
 ```sh
 make benchmark
 ```
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
